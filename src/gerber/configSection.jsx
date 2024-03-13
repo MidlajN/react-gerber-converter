@@ -8,9 +8,9 @@ function ConfigSection() {
         {/* Quick Setup and Convert Button */}
             <div className="setupDiv">
                 <div>
-                    <h5 for="toolWidth"> Quick Setup</h5>
+                    <h5> Quick Setup</h5>
                     <select name="toolWidth" id="quickSetup">
-                        <option value="custom-setup" selected>Custom</option>
+                        <option value="custom-setup" defaultValue={true}>Custom</option>
                         <option value="top-trace">Top Trace</option>
                         <option value="top-drill">Top Drill</option>
                         <option value="top-cut">Top Cut</option>
@@ -52,15 +52,15 @@ function ConfigSection() {
                     </div>
                     <div className="layer">
                         <span>Traces</span>
-                        <button className="toggleButton" style={{'background-color': '#ced8cd'}}><FontAwesomeIcon icon="fa-solid fa-eye" style={{'color': '#ffffff'}}/></button>
+                        <button className="toggleButton" style={{'backgroundColor': '#ced8cd'}}><FontAwesomeIcon icon="fa-solid fa-eye" style={{'color': '#ffffff'}}/></button>
                     </div>
                     <div className="layer">
                         <span>Pads</span>
-                        <button className="toggleButton" style={{'background-color': '#b9a323'}}><FontAwesomeIcon icon="fa-solid fa-eye" style={{'color': '#ffffff'}}/></button>
+                        <button className="toggleButton" style={{'backgroundColor': '#b9a323'}}><FontAwesomeIcon icon="fa-solid fa-eye" style={{'color': '#ffffff'}}/></button>
                     </div>
                     <div className="layer">
                         <span>Silk Screen</span>
-                        <button className="toggleButton" style={{'background-color': '#348f9b'}}><FontAwesomeIcon icon="fa-solid fa-eye" style={{'color': '#ffffff'}}/></button>
+                        <button className="toggleButton" style={{'backgroundColor': '#348f9b'}}><FontAwesomeIcon icon="fa-solid fa-eye" style={{'color': '#ffffff'}}/></button>
                     </div>
                 </div>
 
@@ -70,39 +70,39 @@ function ConfigSection() {
                     </div>
                     <div className="layer">
                         <span>Traces</span>
-                        <button className="toggleButton" style={{'background-color': '#206b19'}}><FontAwesomeIcon icon="fa-solid fa-eye" style={{'color': '#ffffff'}}/></button>
+                        <button className="toggleButton" style={{'backgroundColor': '#206b19'}}><FontAwesomeIcon icon="fa-solid fa-eye" style={{'color': '#ffffff'}}/></button>
                     </div>
                     <div className="layer">
                         <span>Pads</span>
-                        <button className="toggleButton" style={{'background-color': '#b9a323'}}><FontAwesomeIcon icon="fa-solid fa-eye" style={{'color': '#ffffff'}}/></button>
+                        <button className="toggleButton" style={{'backgroundColor': '#b9a323'}}><FontAwesomeIcon icon="fa-solid fa-eye" style={{'color': '#ffffff'}}/></button>
                     </div>
                     <div className="layer">
                         <span>Silk Screen</span>
-                        <button className="toggleButton" style={{'background-color': '#348f9b'}}><FontAwesomeIcon icon="fa-solid fa-eye" style={{'color': '#ffffff'}}/></button>
+                        <button className="toggleButton" style={{'backgroundColor': '#348f9b'}}><FontAwesomeIcon icon="fa-solid fa-eye" style={{'color': '#ffffff'}}/></button>
                     </div>
                 </div>
 
                 <div className='commonLayers mt-10'>
                     <div className="layer">
                         <span>Outline</span>
-                        <button className="toggleButton" style={{'background-color': '#348f9b'}}><FontAwesomeIcon icon="fa-solid fa-eye" style={{'color': '#ffffff'}}/></button>
+                        <button className="toggleButton" style={{'backgroundColor': '#348f9b'}}><FontAwesomeIcon icon="fa-solid fa-eye" style={{'color': '#ffffff'}}/></button>
                     </div>
                     <div className="layer">
                         <span>Drill</span>
-                        <button className="toggleButton" style={{'background-color': '#348f9b'}}><FontAwesomeIcon icon="fa-solid fa-eye" style={{'color': '#ffffff'}}/></button>
+                        <button className="toggleButton" style={{'backgroundColor': '#348f9b'}}><FontAwesomeIcon icon="fa-solid fa-eye" style={{'color': '#ffffff'}}/></button>
                     </div>
                     <div className="layer">
                         <span>OuterLayer</span>
-                        <button className="toggleButton" style={{'background-color': 'rgb(85 119 89)'}}><FontAwesomeIcon icon="fa-solid fa-eye" style={{'color': '#ffffff'}}/></button>
+                        <button className="toggleButton" style={{'backgroundColor': 'rgb(85 119 89)'}}><FontAwesomeIcon icon="fa-solid fa-eye" style={{'color': '#ffffff'}}/></button>
                     </div>
                 </div>
             </div>
 
         {/* Canvas Background Selector */}
-            <div class="canvasDiv">
-                <label for="canvasBg">Canvas Background </label>
+            <div className="canvasDiv">
+                <label htmlFor='canvasSelect'>Canvas Background </label>
                 <select name="canvasSelect" id="canvasBg">
-                    <option value="black" selected>Black</option>
+                    <option value="black" defaultValue={true}>Black</option>
                     <option value="white">White</option>
                 </select>
             </div> 

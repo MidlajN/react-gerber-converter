@@ -1,0 +1,14 @@
+/* Gerber Drop Area */
+.dropArea {
+    height:100%;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.dropArea .dropbox div{
+    border: 1px dotted #cccccc;
+    padding: 20px;
+    text-align: center;
+    background-color: white;
+}

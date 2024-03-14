@@ -12,20 +12,32 @@ function GerberSection() {
     const [topstack, setTopStack] = useState(null);
     const [bottomstack, setBottomStack] = useState(null);
     const [fullLayers, setFullLayers] = useState(null);
+    const [mainSvg, setMainSvg] = useState(null);
+    const [isAnimating, setIsAnimating] = useState(false);
 
     const resultRef = useRef(null);
     const dropAreaRef = useRef(null);
 
     useEffect(() => {
 
-        if (topstack) {
-            resultRef.current.innerHTML = '';
-
-            resultRef.current.appendChild(topstack)
-            // resultRef.current.appendChild(bottomstack)
+        if (resultRef.current && mainSvg) {
+            
+            setIsAnimating(true);
+            setTimeout(() => {
+                resultRef.current.innerHTML = '';
+                setTimeout(() => {
+                    resultRef.current.appendChild(mainSvg);
+                    setIsAnimating(false);
+                }, 250);
+            }, 300);
+            
         }
+    },[mainSvg])
 
-    }, [topstack, bottomstack])
+    const transitionStyle = {
+        transition: 'opacity 0.3s ease-in-out',
+        opacity: isAnimating ? 0 : 1,
+    };
 
     const handleInputFiles = (e) => {
         e.preventDefault();
@@ -33,7 +45,7 @@ function GerberSection() {
         // Access the Files From DataTransfer Object if the files are dropped
         const files = e.dataTransfer ? e.dataTransfer.files : e.target.files;
         convertToSvg(files, setTopStack, setBottomStack, setFullLayers).then(() => {
-            dropAreaRef.current.style.display = 'none';
+            dropAreaRef.current.style.display = 'none';   
         })
     }
     
@@ -45,6 +57,11 @@ function GerberSection() {
                 </div>
                 <div className="h-full flex items-center justify-end">
                     <div className="w-4/5 h-full gridsection">
+                        <div className="layerSideBtnGroup">
+                            <button className="button-side" onClick={() => { setMainSvg(fullLayers) }}><span className="text">Layers</span></button>
+                            <button className="button-side" onClick={() => { setMainSvg(topstack) }}><span className="text">Top</span></button>
+                            <button className="button-side" onClick={() => { setMainSvg(bottomstack) }}><span className="text">Bottom</span></button>
+                        </div>
                         <div 
                             ref={ dropAreaRef }
                             className={`dropArea ${isDragging ? 'active' : ''}`} 
@@ -70,11 +87,15 @@ function GerberSection() {
                                 contentStyle={{  margin:'auto', transition: 'transform 0.3s ease' }} 
                                 wrapperStyle={{ width: '100%', height: '100%', overflow:'visible', display:'flex'}} 
                             >
-                                <div ref={ resultRef } className="flex items-center h-full justify-center"></div>
+                                <div ref={ resultRef } style={transitionStyle} className="flex items-center h-full justify-center"></div>
                             </TransformComponent>
                         </TransformWrapper>
 
-
+                        <div className="layerTypeBtnGroup">
+                            <button id="original" className="button-side colorButton active" role="button"><span className="text">Original</span></button>
+                            <button id="bw" className="button-side colorButton" role="button"><span className="text">B/W</span></button>
+                            <button id="invert" className="button-side colorButton" role="button"><span className="text">Invert</span></button> 
+                        </div>
 
 
 

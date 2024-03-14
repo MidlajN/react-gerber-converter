@@ -1,8 +1,6 @@
 
 
 async function convertToSvg(files, setTopStack, setBottomStack, setFullLayers) {
-    const fullStackSvg = useGerberToSvg(files, stackup.layers, stackup.top)
-    setFullLayers(fullStackSvg)
 
     const stackup = await useStackup(files)
     const topxmlDoc = new DOMParser().parseFromString(stackup.top.svg, 'image/svg+xml');
@@ -12,6 +10,9 @@ async function convertToSvg(files, setTopStack, setBottomStack, setFullLayers) {
     const bottomxmlDoc = new DOMParser().parseFromString(stackup.bottom.svg, 'image/svg+xml');
     const bottomsvg = bottomxmlDoc.documentElement;
     setBottomStack(bottomsvg)
+
+    const fullStackSvg = useGerberToSvg(files, stackup.layers, stackup.top)
+    setFullLayers(fullStackSvg)
 }
 
 export default convertToSvg

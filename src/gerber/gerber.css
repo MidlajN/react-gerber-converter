@@ -22,6 +22,77 @@
     position: relative;
     overflow: hidden;
 }
+.gridsection .layerSideBtnGroup {
+    position: absolute;
+    left: 50%;
+    transform: translate(-50%, 0);
+    z-index: 99;
+    top: 1rem;
+}
+.gridsection .layerTypeBtnGroup {
+    position: absolute;
+    left: 50%;
+    transform: translate(-50%, 0);
+    z-index: 99;
+    bottom: 1rem; 
+}
+
+
+.gridsection .layerSideBtnGroup .button-side {
+    margin-inline: 0.2rem;
+}
+
+.gridsection .layerTypeBtnGroup .button-side,
+.gridsection .layerSideBtnGroup .button-side {
+    background-color: #FFFFFF;
+    cursor: pointer;
+    font-family: Clarkson,Helvetica,sans-serif;
+    font-size: 14px;
+    letter-spacing: 0.15rem;
+    line-height: 1em;
+    opacity: 1;
+    padding: 0.5em 1.2em;
+    position: relative;
+    text-transform: uppercase;
+    transition: opacity 300ms cubic-bezier(.694, 0, 0.335, 1),background-color 100ms cubic-bezier(.694, 0, 0.335, 1),color 100ms cubic-bezier(.694, 0, 0.335, 1);
+    -moz-user-select: none;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+.gridsection .layerTypeBtnGroup .button-side::before ,
+.gridsection .layerSideBtnGroup .button-side::before{
+    animation: opacityFallbackOut .5s step-end forwards;
+    backface-visibility: hidden;
+    background-color: #EBEBEB;
+    clip-path: polygon(-1% 0, 0 0, -25% 100%, -1% 100%);
+    content: "";
+    height: 100%;
+    left: 0;
+    position: absolute;
+    top: 0;
+    transform: translateZ(0);
+    transition: clip-path .5s cubic-bezier(.165, 0.84, 0.44, 1), -webkit-clip-path .5s cubic-bezier(.165, 0.84, 0.44, 1);
+    width: 100%;
+}  
+
+.gridsection .layerTypeBtnGroup .button-side:hover::before,
+.gridsection .layerSideBtnGroup .button-side:hover::before {
+    animation: opacityFallbackIn 0s step-start forwards;
+    clip-path: polygon(0 0, 101% 0, 101% 101%, 0 101%);
+}  
+
+.gridsection .layerTypeBtnGroup .button-side::after,
+.gridsection .layerSideBtnGroup .button-side::after {
+    background-color: #FFFFFF;
+} 
+
+.gridsection .layerTypeBtnGroup .button-side span,
+.gridsection .layerSideBtnGroup .button-side span {
+    z-index: 1;
+    position: relative;
+}
+
 
 /* Gerber Drop Area */
 .dropArea {

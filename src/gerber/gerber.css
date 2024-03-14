@@ -1,3 +1,26 @@
+
+.gridsection {
+    background:
+        linear-gradient(-90deg, rgb(1 149 219 / 5%) 1px, #fffffff2 1px), 
+        linear-gradient(rgb(181 181 181 / 3%) 1px, transparent 1px), 
+        linear-gradient(-90deg, rgb(6 124 169 / 23%) 1px, #0085af26 1px), 
+        linear-gradient(rgb(129 129 129 / 12%) 1px, transparent 1px), 
+        linear-gradient(white 3px, #ffffff 3px, #ffffff 78px, transparent 78px), 
+        linear-gradient(-90deg, #bdbdbd 1px, transparent 1px), 
+        linear-gradient(-90deg, transparent 3px, #f2f2f2 3px, #f2f2f2 78px, transparent 78px), 
+        linear-gradient(#cdcdcd 1px, transparent 1px), #f2f2f2;
+    background-size:
+        4px 4px,
+        4px 4px,
+        80px 80px,
+        80px 80px,
+        80px 80px,
+        80px 80px,
+        80px 80px,
+        80px 80px;
+    box-shadow: inset 0px 0px 10px 0px rgb(255 255 255);
+}
+
 /* Gerber Drop Area */
 .dropArea {
     height:100%;
@@ -11,4 +34,23 @@
     padding: 20px;
     text-align: center;
     background-color: white;
+}
+
+/* PNG IMAGE Section */
+.pngDiv {
+    max-width: 20%;
+    position: absolute;
+    right: 0;
+    padding: 1rem;
+}
+.pngDiv .png {
+    width: 100%;
+    background-color: white;
+    border-radius: 5px;
+    box-shadow: rgba(9, 30, 66, 0.25) 0px 4px 8px -2px, rgba(9, 30, 66, 0.08) 0px 0px 0px 1px;
+}
+.pngDiv .footer {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.5rem 1rem;
 }

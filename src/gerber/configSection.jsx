@@ -45,7 +45,7 @@ function ConfigSection() {
             </div>
 
         {/* Layers Toggle Buttons */}
-            <div className="toggleLayers p-3">
+            <div className="toggleLayers p-3 lg:block md:flex md:items-end md:gap-5">
                 <div className='topLayers'>
                     <div className="heading">
                         <h5>Top Layer</h5>
@@ -64,7 +64,7 @@ function ConfigSection() {
                     </div>
                 </div>
 
-                <div className='bottomLayers mt-5'>
+                <div className='bottomLayers lg:mt-5'>
                     <div className="heading">
                         <h5>Bottom Layer</h5>
                     </div>
@@ -82,7 +82,7 @@ function ConfigSection() {
                     </div>
                 </div>
 
-                <div className='commonLayers mt-10'>
+                <div className='commonLayers lg:mt-10 md:items-end'>
                     <div className="layer">
                         <span>Outline</span>
                         <button className="toggleButton" style={{'backgroundColor': '#348f9b'}}><FontAwesomeIcon icon="fa-solid fa-eye" style={{'color': '#ffffff'}}/></button>

@@ -41,6 +41,10 @@
 .gridsection .layerSideBtnGroup .button-side {
     margin-inline: 0.2rem;
 }
+.gridsection .layerSideBtnGroup .button-side.active,
+.gridsection .layerTypeBtnGroup .button-side.active {
+    color: green;
+}
 
 .gridsection .layerTypeBtnGroup .button-side,
 .gridsection .layerSideBtnGroup .button-side {

@@ -1,10 +1,41 @@
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons';
+import { useEffect, useState } from 'react';
 import './configSection.css'
 
-function ConfigSection() {
+
+function ConfigSection(props) {
+    const [active, setActive] = useState(false);
+
+    useEffect(() => {
+        if (props.mainSvg) {
+            setActive(true);
+        }
+    }, [props.mainSvg])
+
+    const ToggleButton = (props) => {
+        const [isToggled, setIsToggled] = useState(false);
+
+        const handleClick = () => {
+            setIsToggled(!isToggled);
+        }
+
+        return (
+            <div className="layer">
+                <span>Traces</span>
+                <button className="toggleButton" style={{ 'backgroundColor': isToggled ? 'white' : props.color }} onClick={ handleClick }>
+                    <FontAwesomeIcon icon={ isToggled ? faEyeSlash : faEye } style={{ 'color': isToggled ?  '#000000' : '#ffffff'}}/>
+                </button>
+            </div>  
+        )
+    }
+
+
+
+
     return (
         <>
-        <div className="p-5">
+        <div className="p-5" style={{ 'pointerEvents' : active ? 'auto' : 'none' }}>
         {/* Quick Setup and Convert Button */}
             <div className="setupDiv">
                 <div>
@@ -50,51 +81,24 @@ function ConfigSection() {
                     <div className="heading">
                         <h5>Top Layer</h5>
                     </div>
-                    <div className="layer">
-                        <span>Traces</span>
-                        <button className="toggleButton" style={{'backgroundColor': '#ced8cd'}}><FontAwesomeIcon icon="fa-solid fa-eye" style={{'color': '#ffffff'}}/></button>
-                    </div>
-                    <div className="layer">
-                        <span>Pads</span>
-                        <button className="toggleButton" style={{'backgroundColor': '#b9a323'}}><FontAwesomeIcon icon="fa-solid fa-eye" style={{'color': '#ffffff'}}/></button>
-                    </div>
-                    <div className="layer">
-                        <span>Silk Screen</span>
-                        <button className="toggleButton" style={{'backgroundColor': '#348f9b'}}><FontAwesomeIcon icon="fa-solid fa-eye" style={{'color': '#ffffff'}}/></button>
-                    </div>
+                    <ToggleButton color="#ced8cd"/> 
+                    <ToggleButton color="#b9a323"/>
+                    <ToggleButton color="#348f9b"/>
                 </div>
 
                 <div className='bottomLayers lg:mt-5'>
                     <div className="heading">
                         <h5>Bottom Layer</h5>
                     </div>
-                    <div className="layer">
-                        <span>Traces</span>
-                        <button className="toggleButton" style={{'backgroundColor': '#206b19'}}><FontAwesomeIcon icon="fa-solid fa-eye" style={{'color': '#ffffff'}}/></button>
-                    </div>
-                    <div className="layer">
-                        <span>Pads</span>
-                        <button className="toggleButton" style={{'backgroundColor': '#b9a323'}}><FontAwesomeIcon icon="fa-solid fa-eye" style={{'color': '#ffffff'}}/></button>
-                    </div>
-                    <div className="layer">
-                        <span>Silk Screen</span>
-                        <button className="toggleButton" style={{'backgroundColor': '#348f9b'}}><FontAwesomeIcon icon="fa-solid fa-eye" style={{'color': '#ffffff'}}/></button>
-                    </div>
+                    <ToggleButton color="#206b19"/> 
+                    <ToggleButton color="#b9a323"/>
+                    <ToggleButton color="#348f9b"/>
                 </div>
 
                 <div className='commonLayers lg:mt-10 md:items-end'>
-                    <div className="layer">
-                        <span>Outline</span>
-                        <button className="toggleButton" style={{'backgroundColor': '#348f9b'}}><FontAwesomeIcon icon="fa-solid fa-eye" style={{'color': '#ffffff'}}/></button>
-                    </div>
-                    <div className="layer">
-                        <span>Drill</span>
-                        <button className="toggleButton" style={{'backgroundColor': '#348f9b'}}><FontAwesomeIcon icon="fa-solid fa-eye" style={{'color': '#ffffff'}}/></button>
-                    </div>
-                    <div className="layer">
-                        <span>OuterLayer</span>
-                        <button className="toggleButton" style={{'backgroundColor': 'rgb(85 119 89)'}}><FontAwesomeIcon icon="fa-solid fa-eye" style={{'color': '#ffffff'}}/></button>
-                    </div>
+                    <ToggleButton color="#348f9b"/>
+                    <ToggleButton color="#348f9b"/>
+                    <ToggleButton color="rgb(85 119 89)"/>
                 </div>
             </div>
 
@@ -112,3 +116,5 @@ function ConfigSection() {
     )
 }
 export default ConfigSection
+
+

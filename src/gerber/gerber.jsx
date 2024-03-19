@@ -101,7 +101,7 @@ function GerberSection() {
         <>
             <div className="relative h-[90%] " >
                 <div className="lg:w-1/5 lg:absolute left-0 top-8 ">
-                    <ConfigSection />
+                    <ConfigSection mainSvg={ mainSvg }/>
                 </div>
                 <div className="h-full flex items-center justify-end">
                     <div className="lg:w-4/5 md:w-full h-full gridsection">

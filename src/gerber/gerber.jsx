@@ -1,13 +1,11 @@
 import { useEffect, useRef, useState } from "react";
 import ConfigSection from "./configSection.jsx"
 import './gerber.css'
-import pcbLogo from '../assets/pcbLogo.png'
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import convertToSvg from "./convert.jsx";
 import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
 
 
-function GerberSection() {
+export default function GerberSection() {
     const [isDragging, setIsDragging] = useState(false);
     const [topstack, setTopStack] = useState({id: null, svg: null});
     const [bottomstack, setBottomStack] = useState({id: null, svg: null});
@@ -15,6 +13,20 @@ function GerberSection() {
     const [mainSvg, setMainSvg] = useState(null);
     const [isAnimating, setIsAnimating] = useState(false);
     const [layerType, setLayerType] = useState(null);
+    const [isToggled, setIsToggled] = useState({
+        toplayer: { trace: false, pads: false, silkscreen: false },
+        bottomlayer: { trace: false, pads: false, silkscreen: false },
+        commonlayer: { outline: false, drill: false, outlayer: false}
+    });
+    const hangleToggleCick = (layertype, layerproperty) => {
+        setIsToggled((prevState) => ({
+            ...prevState,
+            [layertype]: {
+                ...prevState[layertype],
+                [layerproperty]: !prevState[layertype][layerproperty],
+            }
+        }));
+    }
 
     const resultRef = useRef(null);
     const dropAreaRef = useRef(null);
@@ -54,54 +66,11 @@ function GerberSection() {
     }
 
 
-    const handleColorChange = (color, id) => {
-        const svgColor = {
-            'bw': `
-                ${id}_fr4 {color: #000000  !important;}
-                .${id}_cu {color: #ffffff !important;}
-                .${id}_cf {color: #ffffff !important;}
-                .${id}_sm {color: #ffffff; opacity: 0 !important;}
-                .${id}_ss {color: #ffffff !important;}
-                .${id}_sp {color: #ffffff !important;}
-                .${id}_out {color: #000000 !important;}
-            `,
-
-            'bwInvert': `
-                .${id}_fr4 {color: #ffffff  !important;}
-                .${id}_cu {color: #000000 !important;}
-                .${id}_cf {color: #000000 !important;}
-                .${id}_sm {color: #ffffff; opacity: 0 !important;}
-                .${id}_ss {color: #000000 !important;}
-                .${id}_sp {color: #000000 !important;}
-                .${id}_out {color: #ffffff !important;}
-            `,
-
-            'original': `
-                .${id}_fr4 {color: #666666  !important;}
-                .${id}_cu {color: #cccccc !important;}
-                .${id}_cf {color: #cc9933 !important;}
-                .${id}_sm {color: #004200 !important; opacity: 0.75 !important;}
-                .${id}_ss {color: #ffffff !important;}
-                .${id}_sp {color: #999999 !important;}
-                .${id}_out {color: #000000 !important;}
-            `
-        }
-
-        const topstackStyle = topstack.svg.querySelector('style');
-        topstackStyle.innerHTML = svgColor[color];
-
-        const bottomstackStyle = bottomstack.svg.querySelector('style');
-        bottomstackStyle.innerHTML = svgColor[color];
-
-        setLayerType(color)
-    }
-
-
     return (
         <>
             <div className="relative h-[90%] " >
                 <div className="lg:w-1/5 lg:absolute left-0 top-8 ">
-                    <ConfigSection mainSvg={ mainSvg }/>
+                    <ConfigSection mainSvg={ mainSvg } isToggled={ isToggled } setIsToggled={ setIsToggled } onToggle={ hangleToggleCick }/>
                 </div>
                 <div className="h-full flex items-center justify-end">
                     <div className="lg:w-4/5 md:w-full h-full gridsection">
@@ -144,21 +113,21 @@ function GerberSection() {
                                 id="original" 
                                 className={`button-side colorButton ${layerType === 'original' ? 'active' : ''}`}
                                 role="button"
-                                onClick={ () => { handleColorChange('original', topstack.id) } }
+                                onClick={ () => { handleColorChange({ color: 'original', id: topstack.id, topstack: topstack, bottomstack: bottomstack }); setLayerType('original') } }
                             ><span className="text">Original</span></button>
 
                             <button 
                                 id="bw" 
                                 className={`button-side colorButton ${layerType === 'bw' ? 'active' : ''}`}
                                 role="button"
-                                onClick={ () => { handleColorChange('bw', topstack.id) }}
+                                onClick={ () => { handleColorChange({ color: 'bw', id: topstack.id, topstack: topstack, bottomstack: bottomstack }); setLayerType('bw') }}
                             ><span className="text">B/W</span></button>
 
                             <button 
                                 id="invert" 
                                 className={`button-side colorButton ${layerType === 'bwInvert' ? 'active' : ''}`}
                                 role="button"
-                                onClick={ () => { handleColorChange('bwInvert', topstack.id) }}
+                                onClick={ () => { handleColorChange({ color: 'bwInvert', id: topstack.id, topstack: topstack, bottomstack: bottomstack }); setLayerType('bwInvert') }}
                             ><span className="text">Invert</span></button> 
                         </div>
 
@@ -188,4 +157,43 @@ function GerberSection() {
     )
 }
 
-export default GerberSection
+function handleColorChange(props) {
+    const svgColor = {
+        'bw': `
+            ${props.id}_fr4 {color: #000000  !important;}
+            .${props.id}_cu {color: #ffffff !important;}
+            .${props.id}_cf {color: #ffffff !important;}
+            .${props.id}_sm {color: #ffffff; opacity: 0 !important;}
+            .${props.id}_ss {color: #ffffff !important;}
+            .${props.id}_sp {color: #ffffff !important;}
+            .${props.id}_out {color: #000000 !important;}
+        `,
+
+        'bwInvert': `
+            .${props.id}_fr4 {color: #ffffff  !important;}
+            .${props.id}_cu {color: #000000 !important;}
+            .${props.id}_cf {color: #000000 !important;}
+            .${props.id}_sm {color: #ffffff; opacity: 0 !important;}
+            .${props.id}_ss {color: #000000 !important;}
+            .${props.id}_sp {color: #000000 !important;}
+            .${props.id}_out {color: #ffffff !important;}
+        `,
+
+        'original': `
+            .${props.id}_fr4 {color: #666666  !important;}
+            .${props.id}_cu {color: #cccccc !important;}
+            .${props.id}_cf {color: #cc9933 !important;}
+            .${props.id}_sm {color: #004200 !important; opacity: 0.75 !important;}
+            .${props.id}_ss {color: #ffffff !important;}
+            .${props.id}_sp {color: #999999 !important;}
+            .${props.id}_out {color: #000000 !important;}
+        `
+    }
+
+    const topstackStyle = props.topstack.svg.querySelector('style');
+    topstackStyle.innerHTML = svgColor[props.color];
+
+    const bottomstackStyle = props.bottomstack.svg.querySelector('style');
+    bottomstackStyle.innerHTML = svgColor[props.color];
+
+}

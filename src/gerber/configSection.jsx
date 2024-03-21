@@ -1,42 +1,36 @@
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import './configSection.css'
 
 
-function ConfigSection(props) {
+export default function ConfigSection(props) {
+    const { mainSvg, isToggled, onToggle } = props;
     const [active, setActive] = useState(false);
 
     useEffect(() => {
-        if (props.mainSvg) {
+        if (mainSvg) {
             setActive(true);
         }
-    }, [props.mainSvg])
-
-    const ToggleButton = (props) => {
-        const [isToggled, setIsToggled] = useState(false);
-
-        const handleClick = () => {
-            setIsToggled(!isToggled);
-        }
-
-        return (
-            <div className="layer">
-                <span>Traces</span>
-                <button className="toggleButton" style={{ 'backgroundColor': isToggled ? 'white' : props.color }} onClick={ handleClick }>
-                    <FontAwesomeIcon icon={ isToggled ? faEyeSlash : faEye } style={{ 'color': isToggled ?  '#000000' : '#ffffff'}}/>
-                </button>
-            </div>  
-        )
-    }
-
-
-
+    }, [mainSvg])
 
     return (
         <>
         <div className="p-5" style={{ 'pointerEvents' : active ? 'auto' : 'none' }}>
-        {/* Quick Setup and Convert Button */}
+            <QuickSetup />
+            <DoubleSideButton />
+            <LayersToggleButtons isToggled={ isToggled } onToggle={ onToggle }/>
+            <CanvasBackground />
+        </div>
+        </>
+    )
+}
+
+
+function QuickSetup() {
+    return (
+        <>
+            {/* Quick Setup and Convert Button */}
             <div className="setupDiv">
                 <div>
                     <h5> Quick Setup</h5>
@@ -53,56 +47,100 @@ function ConfigSection(props) {
                     <button className="convertBtn" id="renderButton" data-layer="toplayers"><span className='text' id="renderBtnText">Generate PNG </span><span className="icon"><i className="fa-solid fa-download fa-sm"></i></span></button>
                 </div>  
             </div>
+        </>
+    )
+}
 
-        {/* Double Side Toggle and Tool Width Selection */}
+
+ 
+function DoubleSideButton() {
+    const [isChecked, setIsChecked] = useState(false);
+    const toolWidthRef = useRef(null);
+
+    const handleDoubleSide = () => {
+        setIsChecked(!isChecked);
+    }
+
+    return (
+        <>
+            {/* Double Side Toggle and Tool Width Selection */}
             <div className="doubleSideDiv" id="doubleSideOuterDiv">
                 <div className="checkbox">
                     <span>Double Side</span>
                     <label className="toggle" id="doubleSideToggle">
-                    <input type="checkbox" id="sideToggle" />
+                    <input type="checkbox" id="sideToggle" onChange={ handleDoubleSide } />
                     <div className="slider">
                         <span className="oneSide"></span>
                         <span className="twoSide"></span>
                     </div>
                     </label>
                 </div>
-                <div className="selectToolWidth layerHide" id="selectToolWidth">
+                <div className={ `selectToolWidth ${ isChecked ? '' : 'layerHide' }`} id="selectToolWidth">
                     <span>Tool Width</span>
-                    <select name="toolWidth" id="toolWidth">
+                    <select ref={ toolWidthRef } name="toolWidth" id="toolWidth">
                         <option value="0.8">0.8</option>
                         <option value="0.0">0.0</option>
                     </select>
                 </div>
             </div>
+        </>
+    )
+}
 
-        {/* Layers Toggle Buttons */}
+function LayersToggleButtons({isToggled, onToggle}) {
+    const layers = [
+        { type: 'toplayer', label: 'Top Layer', colors: ['#ced8cd', '#b9a323', '#348f9b'], properties: ['trace', 'pads', 'silkscreen'], ids: ['top_copper', 'top_solderpaste', 'top_silkscreen'] },
+        { type: 'bottomlayer', label: 'Bottom Layer', colors: ['#206b19', '#b9a323', '#348f9b'], properties: ['trace', 'pads', 'silkscreen'], ids: ['bottom_copper', 'bottom_solderpaste', 'bottom_silkscreen'] },
+        { type: 'commonlayer', label: null, colors: ['#206b19', '#b9a323', '#348f9b'], properties: ['outline', 'drill', 'outlayer'], ids: ['outline', 'drill', 'OuterLayer'] },
+    ]
+    return (
+        <>
             <div className="toggleLayers p-3 lg:block md:flex md:items-end md:gap-5">
-                <div className='topLayers'>
-                    <div className="heading">
-                        <h5>Top Layer</h5>
+                { layers.map((layer, index) => (
+                    <div key={index} className={ layer.label ? layer.type + ' lg:mt-5' : 'commonlayer lg:mt-5 md:items-end'}>
+                        <div className="heading">
+                            <h5>{ layer.label }</h5>
+                        </div>
+                        { layer.colors.map((color, i) =>(
+                            <ToggleButton 
+                                key={i} 
+                                color={color} 
+                                layerType={layer.type} 
+                                layerProperty={layer.properties[i]}  
+                                isToggled={ isToggled[layer.type][layer.properties[i]] } 
+                                onToggle={ onToggle }
+                                layerId={layer.ids[i]}
+                            />
+                        ))}
                     </div>
-                    <ToggleButton color="#ced8cd"/> 
-                    <ToggleButton color="#b9a323"/>
-                    <ToggleButton color="#348f9b"/>
-                </div>
-
-                <div className='bottomLayers lg:mt-5'>
-                    <div className="heading">
-                        <h5>Bottom Layer</h5>
-                    </div>
-                    <ToggleButton color="#206b19"/> 
-                    <ToggleButton color="#b9a323"/>
-                    <ToggleButton color="#348f9b"/>
-                </div>
-
-                <div className='commonLayers lg:mt-10 md:items-end'>
-                    <ToggleButton color="#348f9b"/>
-                    <ToggleButton color="#348f9b"/>
-                    <ToggleButton color="rgb(85 119 89)"/>
-                </div>
+                ))}
             </div>
+        </>
+    )
+}
 
-        {/* Canvas Background Selector */}
+function ToggleButton(props) {
+    const { color, layerType, layerProperty, isToggled, onToggle, layerId } = props;
+
+    const handleClick = () => {
+        onToggle(layerType, layerProperty);
+    }
+
+    return (
+        <div className="layer">
+            <span style={{ textTransform:'capitalize' }}>{ layerProperty }</span>
+            <button className="toggleButton" style={{ 'backgroundColor': isToggled ? 'white' : color }} onClick={ handleClick }>
+                <FontAwesomeIcon icon={ isToggled ? faEyeSlash : faEye } style={{ 'color': isToggled ?  '#000000' : '#ffffff'}}/>
+            </button>
+        </div>  
+    )
+}
+
+
+function CanvasBackground() {
+    return (
+        <>
+            {/* Canvas Background Selector */}
             <div className="canvasDiv">
                 <label htmlFor='canvasSelect'>Canvas Background </label>
                 <select name="canvasSelect" id="canvasBg">
@@ -110,11 +148,6 @@ function ConfigSection(props) {
                     <option value="white">White</option>
                 </select>
             </div> 
-
-        </div>
         </>
     )
 }
-export default ConfigSection
-
-

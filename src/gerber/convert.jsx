@@ -1,25 +1,25 @@
 
 
-async function convertToSvg(files, setTopStack, setBottomStack, setFullLayers, setMainSvg) {
 
+export default async function convertToSvg(files, setTopStack, setBottomStack, setFullLayers, setMainSvg) {
 
     const stackup = await useStackup(files)
     const topxmlDoc = new DOMParser().parseFromString(stackup.top.svg, 'image/svg+xml');
     const topsvg = topxmlDoc.documentElement;
-    setTopStack({id: stackup.id, svg: topsvg})
-
-    console.log('STACKUP :::', stackup)
     const bottomxmlDoc = new DOMParser().parseFromString(stackup.bottom.svg, 'image/svg+xml');
     const bottomsvg = bottomxmlDoc.documentElement;
-    setBottomStack({id: stackup.id, svg: bottomsvg})
+
+    const newTopSvg = modifiedSvg({ svg: topsvg, id: 'toplayer', viewbox: stackup.top.viewBox, width: stackup.top.width, height: stackup.top.height})
+    const newBottomSvg = modifiedSvg({ svg: bottomsvg, id: 'bottomlayer', viewbox: stackup.bottom.viewBox, width: stackup.bottom.width, height: stackup.bottom.height})
 
     const fullStackSvg = useGerberToSvg(files, stackup.layers, stackup.top)
-    setFullLayers(fullStackSvg)
-
-    setMainSvg(topsvg)
+    const newFullStackSvg = modifiedSvg({ svg: fullStackSvg, id: 'fullstack', viewbox: stackup.top.viewBox, width: stackup.top.width, height: stackup.top.height})
+    
+    setFullLayers(newFullStackSvg)
+    setTopStack({id: stackup.id, svg: newTopSvg})
+    setBottomStack({id: stackup.id, svg: newBottomSvg})
+    setMainSvg(newTopSvg);
 }
-
-export default convertToSvg
 
 
 function useStackup(filesList) {
@@ -107,4 +107,106 @@ function useGerberToSvg(files, layers, svgData) {
     fullLayerSvg.appendChild(fullLayerG);
 
     return fullLayerSvg
+}
+
+
+function modifiedSvg(props) {
+    const { svg, id, viewbox, width, height } = props;
+    console.log('SVG', svg, id, viewbox, width, height)
+    const newSvg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    const outerG = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+    const mainG = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+
+    if (id !== 'fullstack') {
+        const Gs = svg.querySelectorAll('g');
+        Gs.forEach((g) => {
+            if (g.hasAttribute('id')) {
+                if (g.getAttribute('id').includes('soldermask')) {
+                    g.style.display = g.style.display === 'none' ? 'block' : 'none';    
+                }
+            }
+        })
+    }
+
+    const clipPath = svg.querySelector('clipPath');
+    if (clipPath) {
+        const d = clipPath.querySelector('path').getAttribute('d');
+
+        const outlineG = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+        const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        path.setAttribute('d', d);
+        path.setAttribute('fill', 'none');
+        outlineG.setAttribute('id', 'drillMask');
+        outlineG.setAttribute('transform', `translate(${ viewbox[0] + 100 } ${ viewbox[1] + viewbox[3] - 100 }) scale(0.99, -0.99) translate(${ -viewbox[0] } ${ -viewbox[1]})`);
+        outlineG.appendChild(path);
+
+        svg.insertBefore(outlineG, svg.firstChild);
+    }
+    
+    const outer = generateOuterSvg(width, height, 0.8, {x: viewbox[0], y: viewbox[1]});
+
+    outer.svg.setAttribute('style', 'fill: #86877c; opacity: 0.5');
+    outer.svg.setAttribute('id', `${id}outer-svg`);
+    outerG.setAttribute('id', `${id}outer`);
+    outerG.setAttribute('style', 'display: none;')
+
+    newSvg.setAttribute('id', `${id}`);
+    newSvg.setAttribute('width', `${outer.width}mm`);
+    newSvg.setAttribute('height', `${outer.height}mm`);
+
+    svg.setAttribute('id', `${id}svg`);
+    mainG.appendChild(svg);
+    mainG.setAttribute('id', `${id}MainLayer`);
+    mainG.setAttribute('transform', 'translate(3, 3)');
+
+    outerG.appendChild(outer.svg);
+    mainG.appendChild(svg);
+    newSvg.appendChild(outerG);
+    newSvg.appendChild(mainG);
+
+    return newSvg
+}
+
+function generateOuterSvg(width, height, toolwidth , viewbox) {
+    const halfWidth = width / 2;
+    const halfHeight = height / 2;
+    const originX = viewbox.x;
+    const originY = viewbox.y;
+    // svg_outer_width = width + 2 * toolwidth;
+    // svg_outer_height = height + 2 * toolwidth;
+  
+    // Generate Outer SVG
+    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    svg.setAttribute('viewBox', `${originX - toolwidth} ${originY - toolwidth} ${width + 2 * toolwidth} ${height + 2 * toolwidth}`);
+    svg.setAttribute('width', `${width + 2 * toolwidth}mm`);
+    svg.setAttribute('height', `${height + 2 * toolwidth}mm`);
+  
+    const pathlines =   `
+    M ${ originX } ${ originY }
+    L ${ originX + halfWidth +  2 * toolwidth } ${ originY }
+    L ${ originX + halfWidth +  2 * toolwidth } ${ originY - toolwidth }
+    L ${ originX + width + toolwidth } ${ originY - toolwidth }
+    L ${ originX + width + toolwidth } ${ originY + halfHeight + 2 * toolwidth }
+    L ${ originX + width } ${ originY + halfHeight + 2 * toolwidth }
+    L ${ originX + width } ${ originY + height }
+    L ${ originX + halfWidth - 2 * toolwidth } ${ originY + height }
+    L ${ originX + halfWidth - 2 * toolwidth } ${ originY + height + toolwidth }
+    L ${ originX - toolwidth } ${ originY + height + toolwidth }
+    L ${ originX - toolwidth } ${ originY + halfHeight - 2 * toolwidth }
+    L ${ originX } ${ originY + halfHeight - 2 * toolwidth }
+    L ${ originX } ${ originY }
+    Z`
+  
+    let path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    path.setAttribute('d', pathlines);
+  
+    svg.appendChild(path)
+  
+  
+    let response = {
+      svg : svg,
+      width : width + 2 * toolwidth,
+      height : height + 2 * toolwidth,
+    }
+    return response
 }

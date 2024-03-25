@@ -1,7 +1,7 @@
 
 
 
-export default async function convertToSvg(files, setTopStack, setBottomStack, setFullLayers, setMainSvg) {
+export default async function convertToSvg(files, setTopStack, setBottomStack, setFullLayers, setMainSvg, setStackConfig) {
 
     const stackup = await useStackup(files)
     const topxmlDoc = new DOMParser().parseFromString(stackup.top.svg, 'image/svg+xml');
@@ -15,10 +15,21 @@ export default async function convertToSvg(files, setTopStack, setBottomStack, s
     const fullStackSvg = useGerberToSvg(files, stackup.layers, stackup.top)
     const newFullStackSvg = modifiedSvg({ svg: fullStackSvg, id: 'fullstack', viewbox: stackup.top.viewBox, width: stackup.top.width, height: stackup.top.height})
     
+
+    setStackConfig({ 
+        viewbox: { 
+            viewboxX: stackup.top.viewBox[0], 
+            viewboxY: stackup.top.viewBox[1], 
+            viewboxW: stackup.top.viewBox[2], 
+            viewboxH: stackup.top.viewBox[3] 
+        }, 
+        width: stackup.top.width, 
+        height: stackup.top.height})
+
     setFullLayers(newFullStackSvg)
     setTopStack({id: stackup.id, svg: newTopSvg})
     setBottomStack({id: stackup.id, svg: newBottomSvg})
-    setMainSvg(newTopSvg);
+    setMainSvg({id: 'top_layer', svg: newTopSvg});
 }
 
 
@@ -94,7 +105,7 @@ function useGerberToSvg(files, layers, svgData) {
                     };
 
                     const layerstyle = layerStyle[ids[index]] || { color: 'green', opacity: 0.5 };
-                    gElement.setAttribute('style', `color: ${layerstyle.color}; opacity: ${layerstyle.opacity};`);
+                    gElement.setAttribute('style', `color: ${layerstyle.color}; opacity: ${layerstyle.opacity}; display: ${ layerstyle.display ? layerstyle.display : 'block' }`);
                     fullLayerG.appendChild(gElement);
                 }
             })
@@ -112,7 +123,7 @@ function useGerberToSvg(files, layers, svgData) {
 
 function modifiedSvg(props) {
     const { svg, id, viewbox, width, height } = props;
-    console.log('SVG', svg, id, viewbox, width, height)
+    // console.log('SVG', svg, id, viewbox, width, height)
     const newSvg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
     const outerG = document.createElementNS('http://www.w3.org/2000/svg', 'g');
     const mainG = document.createElementNS('http://www.w3.org/2000/svg', 'g');
@@ -137,13 +148,14 @@ function modifiedSvg(props) {
         path.setAttribute('d', d);
         path.setAttribute('fill', 'none');
         outlineG.setAttribute('id', 'drillMask');
-        outlineG.setAttribute('transform', `translate(${ viewbox[0] + 100 } ${ viewbox[1] + viewbox[3] - 100 }) scale(0.99, -0.99) translate(${ -viewbox[0] } ${ -viewbox[1]})`);
+        outlineG.setAttribute('transform', `translate(${ viewbox[0] + 440 } ${ viewbox[1] + viewbox[3] -500 }) scale(0.99, -0.99) translate(${ -viewbox[0] } ${ -viewbox[1]})`);
         outlineG.appendChild(path);
 
         svg.insertBefore(outlineG, svg.firstChild);
     }
-    
-    const outer = generateOuterSvg(width, height, 0.8, {x: viewbox[0], y: viewbox[1]});
+
+
+    const outer = generateOuterSvg(width, height, 0.8, { viewboxX: viewbox[0], viewboxY: viewbox[1]});
 
     outer.svg.setAttribute('style', 'fill: #86877c; opacity: 0.5');
     outer.svg.setAttribute('id', `${id}outer-svg`);
@@ -155,23 +167,23 @@ function modifiedSvg(props) {
     newSvg.setAttribute('height', `${outer.height}mm`);
 
     svg.setAttribute('id', `${id}svg`);
-    mainG.appendChild(svg);
-    mainG.setAttribute('id', `${id}MainLayer`);
+    // mainG.appendChild(svg);
+    mainG.setAttribute('id', `${id}MainG`);
     mainG.setAttribute('transform', 'translate(3, 3)');
 
     outerG.appendChild(outer.svg);
     mainG.appendChild(svg);
     newSvg.appendChild(outerG);
     newSvg.appendChild(mainG);
-
+    
     return newSvg
 }
 
-function generateOuterSvg(width, height, toolwidth , viewbox) {
+export function generateOuterSvg(width, height, toolwidth , viewbox) {
     const halfWidth = width / 2;
     const halfHeight = height / 2;
-    const originX = viewbox.x;
-    const originY = viewbox.y;
+    const originX = viewbox.viewboxX;
+    const originY = viewbox.viewboxY;
     // svg_outer_width = width + 2 * toolwidth;
     // svg_outer_height = height + 2 * toolwidth;
   

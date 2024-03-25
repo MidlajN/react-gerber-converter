@@ -4,8 +4,7 @@ import { useEffect, useState, useRef } from 'react';
 import './configSection.css'
 import { useGerberConfig } from './gerberContext';
 import { generateOuterSvg } from './convert';
-import svg2png, { PngComponent } from './svg2png';
-import ReactDOM from 'react-dom/client'
+import svg2png from './svg2png'
 
 
 
@@ -37,27 +36,13 @@ export default function ConfigSection(props) {
 
 
 function QuickSetup(props) {
-    const { mainSvg, canvasBg, pngUrls, setPngUrls } = useGerberConfig();
-
-    useEffect(() => {
-        if (props.pngRef.current && pngUrls.length > 1) {
-            const latestUrl = pngUrls[pngUrls.length - 1].url;
-            const name = pngUrls[pngUrls.length - 1].name;
-            const div = document.createElement('div');
-            div.setAttribute('class', 'my-2 png')
-            ReactDOM.createRoot(div).render(
-                <PngComponent 
-                    blobUrl={ latestUrl } 
-                    name={ `${ name }.png` } 
-                    handleDelete={ () => div.remove() }
-                    />
-            );
-            props.pngRef.current.insertBefore(div, props.pngRef.current.firstChild);
-        }
-    },[pngUrls])
+    const { mainSvg, canvasBg, pngUrls, setPngUrls, fullLayers, topstack } = useGerberConfig();
 
     const handlePngConversion = () => {
-        let svg = mainSvg.svg.cloneNode(true);
+        let svg;
+        if (mainSvg.svg === fullLayers) { svg = topstack.svg.cloneNode(true) }
+        else { svg = mainSvg.svg.cloneNode(true) }
+        
         console.log('svg', svg)
         const [outerSvg, gerberSvg] = svg.querySelectorAll('svg');
         const canvasBackground = canvasBg;

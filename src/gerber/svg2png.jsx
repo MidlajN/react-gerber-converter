@@ -54,16 +54,18 @@ export function PngComponent(props) {
 
     return (
         <>
-            <img src={ blobUrl } className="w-full" alt="" />
-            <div className="footer">
-                <p className="text-[12px]">{ name }</p>
-                <div className="buttons flex gap-2">
-                    <a href={ blobUrl } download={ name }>
-                        <FontAwesomeIcon icon="fa-solid fa-download" />
-                    </a>
-                    <button onClick={handleDelete}>
-                        <FontAwesomeIcon icon="fa-solid fa-trash" />
-                    </button>
+            <div className="png my-2">
+                <img src={ blobUrl } className="w-full" alt="" />
+                <div className="footer">
+                    <p className="text-[12px]">{ name }</p>
+                    <div className="buttons flex gap-2">
+                        <a href={ blobUrl } download={ name }>
+                            <FontAwesomeIcon icon="fa-solid fa-download" />
+                        </a>
+                        <button onClick={handleDelete}>
+                            <FontAwesomeIcon icon="fa-solid fa-trash" />
+                        </button>
+                    </div>
                 </div>
             </div>
         </>

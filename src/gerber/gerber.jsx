@@ -4,13 +4,11 @@ import './gerber.css'
 import convertToSvg from "./convert.jsx";
 import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
 import { useGerberConfig } from "./gerberContext.jsx";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { PngComponent } from "./svg2png.jsx";
-import ReactDOM from 'react-dom/client'
 
 export default function GerberSection() {
     const [isAnimating, setIsAnimating] = useState(false);
-    const { mainSvg, layerType, pngUrls } = useGerberConfig();
+    const { mainSvg, pngUrls, setPngUrls } = useGerberConfig();
     const resultRef = useRef(null);
     const pngRef = useRef(null)
 
@@ -49,7 +47,7 @@ export default function GerberSection() {
                         <TransformWrapper 
                             initialScale={1} 
                             minScale={.5} 
-                            limitToBounds={false }
+                            limitToBounds={ false }
                         >
                             <TransformComponent
                                 contentStyle={{  margin:'auto', transition: 'transform 0.3s ease' }} 
@@ -61,7 +59,29 @@ export default function GerberSection() {
 
                         <SvgColorComponent />
 
-                        <div className="pngDiv" ref={pngRef}></div>
+                        <div className="pngDiv">
+                            { pngUrls.length > 0 && (
+                                <div className="zipDiv">
+                                    <button className="button-side" style={{ width: '100%' }}><span className="text">Download Zip</span></button>
+                                </div>
+                            )}
+                            <div ref={pngRef}>
+                                { pngUrls.map((url, index) => (
+                                    <PngComponent 
+                                        key={index} 
+                                        blobUrl={ url.url } 
+                                        name={ `${ url.name }.png` } 
+                                        handleDelete={ () => {
+                                            setPngUrls((prevState) => {
+                                                const newState = [...prevState];
+                                                newState.splice(index, 1);
+                                                return newState
+                                            });
+                                        }}
+                                    />
+                                ))}
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -71,7 +91,7 @@ export default function GerberSection() {
 
 
 function DropAreaComponent() {
-    const { setTopStack, setBottomStack, setFullLayers, setMainSvg, layerType, setLayerType, setStackConfig } = useGerberConfig();
+    const { setTopStack, setBottomStack, setFullLayers, setMainSvg, setLayerType, setStackConfig } = useGerberConfig();
 
     const [isDragging, setIsDragging] = useState(false);
     const dropAreaRef = useRef(null);
@@ -84,7 +104,6 @@ function DropAreaComponent() {
         convertToSvg(files, setTopStack, setBottomStack, setFullLayers, setMainSvg, setStackConfig).then(() => {
             dropAreaRef.current.style.display = 'none';   
             setLayerType('original')
-            console.log('layerType' , layerType)
         })
     }
 

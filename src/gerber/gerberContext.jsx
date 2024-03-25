@@ -9,7 +9,7 @@ export const GerberProvider = ({children}) => {
     const [fullLayers, setFullLayers] = useState(null);
     const [layerType, setLayerType] = useState(null);
     const [canvasBg, setCanvasBg] = useState('black');
-    const [pngUrls, setPngUrls] = useState([{name: null, url: null}]);
+    const [pngUrls, setPngUrls] = useState([]);
     const [stackConfig, setStackConfig] = useState({ vewbox: { viewboxX: 0, viewboxY: 0, viewboxW: 0, viewboxH: 0}, width: 0, height: 0 });
     const [isToggled, setIsToggled] = useState({
         toplayer: { trace: false, pads: false, silkscreen: false },

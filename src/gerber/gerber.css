@@ -1,15 +1,14 @@
 
 .gridsection {
     background:
-        linear-gradient(-90deg, rgba(0,0,0,.05) 1px, transparent 1px),
-        linear-gradient(rgba(0,0,0,.05) 1px, transparent 1px), 
-        linear-gradient(-90deg, rgba(0, 0, 0, .04) 1px, transparent 1px),
-        linear-gradient(rgba(0,0,0,.04) 1px, transparent 1px),
-        linear-gradient(transparent 3px, #f2f2f2 3px, #f2f2f2 78px, transparent 78px),
-        linear-gradient(-90deg, #aaa 1px, transparent 1px),
-        linear-gradient(-90deg, transparent 3px, #f2f2f2 3px, #f2f2f2 78px, transparent 78px),
-        linear-gradient(#aaa 1px, transparent 1px),
-        #f2f2f2;
+    linear-gradient(-90deg, rgb(20 20 20 / 5%) 1px, #f3f8ff 1px), 
+    linear-gradient(rgba(0, 0, 0, .05) 1px, #f5f9ff 1px), 
+    linear-gradient(-90deg, rgba(0, 0, 0, .04) 1px, #a0c6ff 1px), 
+    linear-gradient(rgba(0, 0, 0, .04) 1px, #d4e3ff 1px), 
+    linear-gradient(transparent 3px, #f2f2f2 3px, #f2f2f2 78px, #eaf1ff 78px), 
+    linear-gradient(-90deg, #366fc5 1px, #173874 1px), 
+    linear-gradient(-90deg, #cedfff 3px, #f2f2f2 3px, #f2f2f2 78px, #669cff 78px), 
+    linear-gradient(#aaa 1px, #d4e3ff 1px), #f2f2f2;
     background-size:
         4px 4px,
         4px 4px,
@@ -21,6 +20,7 @@
         80px 80px;
     position: relative;
     overflow: hidden;
+    box-shadow: inset rgb(166 207 255 / 59%) 0px 0px 9px;
 }
 .gridsection .layerSideBtnGroup {
     position: absolute;
@@ -47,7 +47,8 @@
 }
 
 .gridsection .layerTypeBtnGroup .button-side,
-.gridsection .layerSideBtnGroup .button-side {
+.gridsection .layerSideBtnGroup .button-side,
+.gridsection .pngDiv .button-side {
     background-color: #FFFFFF;
     cursor: pointer;
     font-family: Clarkson,Helvetica,sans-serif;
@@ -65,7 +66,8 @@
 }
 
 .gridsection .layerTypeBtnGroup .button-side::before ,
-.gridsection .layerSideBtnGroup .button-side::before{
+.gridsection .layerSideBtnGroup .button-side::before,
+.gridsection .pngDiv .button-side::before {
     animation: opacityFallbackOut .5s step-end forwards;
     backface-visibility: hidden;
     background-color: #EBEBEB;
@@ -81,20 +83,31 @@
 }  
 
 .gridsection .layerTypeBtnGroup .button-side:hover::before,
-.gridsection .layerSideBtnGroup .button-side:hover::before {
+.gridsection .layerSideBtnGroup .button-side:hover::before,
+.gridsection .pngDiv .button-side:hover::before {
     animation: opacityFallbackIn 0s step-start forwards;
     clip-path: polygon(0 0, 101% 0, 101% 101%, 0 101%);
 }  
 
 .gridsection .layerTypeBtnGroup .button-side::after,
-.gridsection .layerSideBtnGroup .button-side::after {
+.gridsection .layerSideBtnGroup .button-side::after,
+.gridsection .pngDiv .button-side::after {
     background-color: #FFFFFF;
 } 
 
 .gridsection .layerTypeBtnGroup .button-side span,
-.gridsection .layerSideBtnGroup .button-side span {
+.gridsection .layerSideBtnGroup .button-side span,
+.gridsection .pngDiv .button-side span {
     z-index: 1;
     position: relative;
+}
+
+.gridsection .pngDiv .button-side::before {
+    background-color: rgb(0, 0, 0);
+}
+.gridsection .pngDiv .button-side:hover {
+    color: rgb(255, 255, 255);
+    font-weight: 600;
 }
 
 
@@ -120,6 +133,7 @@
 /* PNG IMAGE Section */
 .pngDiv {
     max-width: 20%;
+    min-width: 20%;
     position: absolute;
     right: 0;
     top: 0;

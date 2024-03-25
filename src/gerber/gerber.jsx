@@ -5,6 +5,8 @@ import convertToSvg from "./convert.jsx";
 import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
 import { useGerberConfig } from "./gerberContext.jsx";
 import { PngComponent } from "./svg2png.jsx";
+import JSZip from "jszip";
+
 
 export default function GerberSection() {
     const [isAnimating, setIsAnimating] = useState(false);
@@ -13,7 +15,6 @@ export default function GerberSection() {
     const pngRef = useRef(null)
 
     useEffect(() => {
-
         if (resultRef.current && mainSvg.svg) {  
             setIsAnimating(true);
             setTimeout(() => {
@@ -25,6 +26,30 @@ export default function GerberSection() {
             }, 300); 
         }
     },[mainSvg])
+
+
+    const downloadZip = () => {
+        const zip = new JSZip();
+        Promise.all(
+            pngUrls.map((pngBlob, index) => {
+                return new Promise((resolve) => {
+                    fetch(pngBlob.url).then(response => response.blob()).then(blob => {
+                        zip.file(`${pngBlob.name}_${index}.png`, blob);
+                        resolve();
+                    })
+                })
+            })
+        ).then(() => {
+            zip.generateAsync({ type : 'blob' }).then(zipBlob => {
+                const url = window.URL.createObjectURL(zipBlob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.setAttribute('download', `gerber_files_${pngUrls.length}.zip`);
+                document.body.appendChild(link);
+                link.click();
+            }).catch(err => { console.log('Error Generating Zip File :', err) })
+        })
+    }
 
 
     const transitionStyle = {
@@ -44,11 +69,7 @@ export default function GerberSection() {
 
                         <DropAreaComponent />
 
-                        <TransformWrapper 
-                            initialScale={1} 
-                            minScale={.5} 
-                            limitToBounds={ false }
-                        >
+                        <TransformWrapper initialScale={1} minScale={.5} limitToBounds={ false }>
                             <TransformComponent
                                 contentStyle={{  margin:'auto', transition: 'transform 0.3s ease' }} 
                                 wrapperStyle={{ width: '100%', height: '100%', overflow:'visible', display:'flex'}} 
@@ -62,11 +83,12 @@ export default function GerberSection() {
                         <div className="pngDiv">
                             { pngUrls.length > 0 && (
                                 <div className="zipDiv">
-                                    <button className="button-side" style={{ width: '100%' }}><span className="text">Download Zip</span></button>
+                                    <button className="button-side" style={{ width: '100%' }} onClick={ downloadZip }><span className="text">Download Zip</span></button>
                                 </div>
                             )}
                             <div ref={pngRef}>
-                                { pngUrls.map((url, index) => (
+                                {/* Create a shallow copy of the pngUrl to render it in reverse order */}
+                                { pngUrls.slice().reverse().map((url, index) => (
                                     <PngComponent 
                                         key={index} 
                                         blobUrl={ url.url } 
@@ -74,7 +96,7 @@ export default function GerberSection() {
                                         handleDelete={ () => {
                                             setPngUrls((prevState) => {
                                                 const newState = [...prevState];
-                                                newState.splice(index, 1);
+                                                newState.splice(pngUrls.length - 1 - index, 1);
                                                 return newState
                                             });
                                         }}

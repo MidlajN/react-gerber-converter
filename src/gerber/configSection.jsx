@@ -6,9 +6,6 @@ import { useGerberConfig } from './gerberContext';
 import { generateOuterSvg } from './convert';
 import svg2png from './svg2png'
 
-
-
-
 export default function ConfigSection(props) {
     const { mainSvg } = useGerberConfig(); 
     const [active, setActive] = useState(false);
@@ -39,36 +36,27 @@ function QuickSetup(props) {
     const { mainSvg, canvasBg, pngUrls, setPngUrls, fullLayers, topstack } = useGerberConfig();
 
     const handlePngConversion = () => {
-        let svg;
-        if (mainSvg.svg === fullLayers) { svg = topstack.svg.cloneNode(true) }
-        else { svg = mainSvg.svg.cloneNode(true) }
-        
-        console.log('svg', svg)
-        const [outerSvg, gerberSvg] = svg.querySelectorAll('svg');
+        const targetSvg = mainSvg.svg === fullLayers ? topstack.svg.cloneNode(true) : mainSvg.svg.cloneNode(true); 
+        const [outerSvg, gerberSvg] = targetSvg.querySelectorAll('svg');
+        const svg = props.isChecked ? targetSvg : gerberSvg;
         const canvasBackground = canvasBg;
-        const drillMask = gerberSvg.querySelector('#drillMask path');
-        drillMask.setAttribute('fill', `${canvasBackground === 'black' ? '#ffffff' : '#000000'}`);
+        const drillPath = gerberSvg.querySelector('#drillMask path');
+        const fillColor = canvasBackground === 'black' ? '#ffffff' : '#000000';
 
-        if (props.isChecked) {
-            outerSvg.setAttribute('style', `opacity: 1; fill:${ canvasBackground === 'black' ? '#ffffff' : '#000000' }`);
-        } else {
-            svg = gerberSvg;    
-        }
-        console.log('svg', svg)
+        drillPath.setAttribute('fill', fillColor);
+        outerSvg.setAttribute('style', `opacity: ${ props.isChecked ? 1 : 0}; fill:${ fillColor }`);
+
         const svgString = new XMLSerializer().serializeToString(svg);
         const width = parseFloat(svg.getAttribute('width'));
         const height = parseFloat(svg.getAttribute('height'));
-
         svg2png(svgString, width, height, canvasBackground).then(canvas => {
             canvas.setAttribute('style', 'width: 100%; height: 100%;');
             canvas.toBlob(pngBlob => {
-                let blobURL = (window.URL || window.webkitURL || window).createObjectURL(pngBlob);
-                setPngUrls([...pngUrls, { name: mainSvg.id, url: blobURL}]);
-            }, 'image/png', { dpi: 1000 });
-        }).catch(err => console.error(err));
-        
+                const blobUrl = (window.URL || window.webkitURL || window).createObjectURL(pngBlob);
+                setPngUrls([...pngUrls, { name: mainSvg.id, url: blobUrl }]);
+            }, 'image/png');
+        }).catch(err => { console.error('Error converting svg to png :', err)});        
     }
-
 
     return (
         <>
@@ -103,9 +91,7 @@ function DoubleSideButton(props) {
     const handleDoubleSide = (e) => {
         setIsChecked(!isChecked);
 
-        if (!e.target.checked && !isToggled['commonlayer']['outlayer']) {
-            handleToggleCick('commonlayer', 'outlayer');
-        } else if (e.target.checked && isToggled['commonlayer']['outlayer']) {
+        if (!e.target.checked && !isToggled['commonlayer']['outlayer'] || e.target.checked && isToggled['commonlayer']['outlayer']) {
             handleToggleCick('commonlayer', 'outlayer');
         }
 
@@ -218,8 +204,12 @@ function ToggleButton(props) {
         })
 
         if (layerId === 'outline') {
-            topstack.svg.querySelector('clipPath').style.display = isToggled ? 'block' : 'none';
-            bottomstack.svg.querySelector('clipPath').style.display = isToggled ? 'block' : 'none';
+            [topstack, bottomstack].forEach(stack => {
+                const clipPath = stack.svg.querySelector('clipPath');
+                if (clipPath) {
+                    clipPath.style.display = isToggled ? 'block' : 'none';
+                }
+            })
         }
         handleToggleCick(layerType, layerProperty);
     }

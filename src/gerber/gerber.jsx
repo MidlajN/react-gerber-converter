@@ -56,7 +56,7 @@ export default function GerberSection() {
         transition: 'opacity 0.3s ease-in-out',
         opacity: isAnimating ? 0 : 1,
     };
-
+ 
     return (
         <>
             <div className="relative h-[90%] " >
@@ -194,7 +194,7 @@ function SvgSideComponent() {
 }
 
 
-function handleColorChange(props) {
+export function handleColorChange(props) {
     const svgColor = {
         'bw': `
             ${props.id}_fr4 {color: #000000  !important;}

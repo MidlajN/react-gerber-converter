@@ -5,6 +5,8 @@ import './configSection.css'
 import { useGerberConfig } from './gerberContext';
 import { generateOuterSvg } from './convert';
 import svg2png from './svg2png'
+import { handleColorChange } from './gerber';
+
 
 export default function ConfigSection(props) {
     const { mainSvg } = useGerberConfig(); 
@@ -32,24 +34,164 @@ export default function ConfigSection(props) {
 }
 
 
+const setUpConfig = (topstack, bottomstack) => {
+    return {
+        'top-trace': {
+            side: 'toplayer',
+            button: 'trace',
+            toggleButtons: [
+                { side: 'toplayer', button: 'pads' },
+                { side: 'toplayer', button: 'silkscreen' },
+                { side: 'commonlayer', button: 'outline' },
+                { side: 'commonlayer', button: 'drill' },
+            ],
+            stack: topstack, 
+            id: 'top_layer_traces',
+            color: 'bw',
+            layerid: 'top_copper',
+            canvas: 'black',
+        },
+        'top-drill': {
+            side: 'commonlayer',
+            button: 'drill',
+            toggleButtons: [
+                { side: 'toplayer', button: 'trace' },
+                { side: 'toplayer', button: 'pads' },
+                { side: 'toplayer', button: 'silkscreen' },
+                { side: 'commonlayer', button: 'outline' },
+            ],
+            stack:topstack,
+            id: 'top_layer_drills',
+            color: 'bwInvert',
+            layerid: 'drill', 
+            canvas: 'white',
+        },
+        'top-cut': {
+            side: 'commonlayer',
+            button: 'outline',
+            toggleButtons: [
+                { side: 'toplayer', button: 'trace' },
+                { side: 'toplayer', button: 'pads' },
+                { side: 'toplayer', button: 'silkscreen' },
+                { side: 'commonlayer', button: 'drill' },
+            ],
+            stack: topstack,
+            id: 'top_layer_outline',
+            color: 'bwInvert',
+            layerid: 'outline',
+            canvas: 'black',
+        },
+        'bottom-trace': {
+            side: 'bottomlayer',
+            button: 'trace',
+            toggleButtons: [
+                { side: 'bottomlayer', button: 'pads' },
+                { side: 'bottomlayer', button: 'silkscreen' },
+                { side: 'commonlayer', button: 'outline' },
+                { side: 'commonlayer', button: 'drill' },
+                { side: 'commonlayer', button: 'outlayer' },
+            ],
+            stack: bottomstack,
+            id: 'bottom_layer_traces',
+            color: 'bw',
+            layerid: 'bottom_copper',
+            canvas: 'black',
+        },
+        'bottom-cut': {
+            side: 'commonlayer',
+            button: 'outline',
+            toggleButtons: [
+                { side: 'bottomlayer', button: 'pads' },
+                { side: 'bottomlayer', button: 'silkscreen' },
+                { side: 'commonlayer', button: 'drill' },
+                { side: 'commonlayer', button: 'outlayer' },
+            ],
+            stack: bottomstack,
+            id: 'bottom_layer_outline',
+            color: 'bwInvert',
+            layerid: 'outline',
+            canvas: 'black',
+        }
+    }
+}
+
 function QuickSetup(props) {
-    const { mainSvg, canvasBg, pngUrls, setPngUrls, fullLayers, topstack } = useGerberConfig();
+    const { mainSvg, setMainSvg, canvasBg, setCanvasBg, pngUrls, setPngUrls, fullLayers, topstack, bottomstack, setIsToggled, layerType, setLayerType } = useGerberConfig();
+    
+    const handleSvg = (svg, option, setup) => {
+        const [outerSvg, gerberSvg] = svg.querySelectorAll('svg');
+
+        gerberSvg.querySelectorAll('g').forEach(g => {
+            
+            if (g.hasAttribute('id')) {
+                console.log('g', g)
+                const id = g.getAttribute('id');
+                g.style.display = id.includes(setup.layerid) ? 'block' : id.includes(setup.stack.id) ? 'none' : id.includes('drillMask') ? 'none' : '   ';
+            }
+        })
+
+        const clipPath = gerberSvg.querySelector('clipPath');
+        if (clipPath) clipPath.style.display = setup.layerid === 'outline' ? 'block' : 'none';
+
+        const outerG = svg.querySelector(`#${ setup.stack === topstack ? 'toplayer': 'bottomlayer' }outer`);
+        outerG.style.display = option === 'top-cut' ? props.isChecked ? 'block' : 'none' : 'none';
+        console.log('option', option, 'setup', setup)
+    }
+
+    const handleQuickSetup = (option) => {
+        const setupConfig = setUpConfig(topstack, bottomstack)
+        const setup = setupConfig[option];
+        const toggleButtons = setupConfig[option].toggleButtons;
+
+        setIsToggled(prevObject => {
+            let updatedState = { ...prevObject };
+
+            // Update the state of the selected button
+            updatedState = {
+                ...updatedState,
+                [setup.side]: {
+                    ...updatedState[setup.side],
+                    [setup.button]: false,
+                }
+            }
+
+            // Update the state of the buttons to be toggled
+            toggleButtons.forEach(button => {
+                updatedState = {
+                    ...updatedState,
+                    [button.side]: {
+                        ...updatedState[button.side],
+                        [button.button]: true,
+                    }
+                }
+            })
+
+            return updatedState;
+        })
+        
+        setCanvasBg(setup.canvas);
+        setMainSvg({id: setup.id, svg: setup.stack.svg })
+        setLayerType(setup.color);
+
+        setTimeout(() => {
+            handleSvg(setup.stack.svg, option, setup);
+            handleColorChange({ color: setup.color, id: topstack.id, topstack: topstack, bottomstack: bottomstack }); 
+        }, 300);  
+    }
 
     const handlePngConversion = () => {
         const targetSvg = mainSvg.svg === fullLayers ? topstack.svg.cloneNode(true) : mainSvg.svg.cloneNode(true); 
         const [outerSvg, gerberSvg] = targetSvg.querySelectorAll('svg');
         const svg = props.isChecked ? targetSvg : gerberSvg;
-        const canvasBackground = canvasBg;
-        const drillPath = gerberSvg.querySelector('#drillMask path');
-        const fillColor = canvasBackground === 'black' ? '#ffffff' : '#000000';
 
-        drillPath.setAttribute('fill', fillColor);
-        outerSvg.setAttribute('style', `opacity: ${ props.isChecked ? 1 : 0}; fill:${ fillColor }`);
+        const drillPath = gerberSvg.querySelector('#drillMask path');
+        drillPath.setAttribute('fill', layerType === 'bw' ? '#ffffff' : '#000000');
+        outerSvg.setAttribute('style', `opacity: ${ props.isChecked ? 1 : 0}; fill:${ canvasBg === 'black' ? '#ffffff' : '#000000' }`);
 
         const svgString = new XMLSerializer().serializeToString(svg);
         const width = parseFloat(svg.getAttribute('width'));
         const height = parseFloat(svg.getAttribute('height'));
-        svg2png(svgString, width, height, canvasBackground).then(canvas => {
+        svg2png(svgString, width, height, canvasBg).then(canvas => {
             canvas.setAttribute('style', 'width: 100%; height: 100%;');
             canvas.toBlob(pngBlob => {
                 const blobUrl = (window.URL || window.webkitURL || window).createObjectURL(pngBlob);
@@ -64,13 +206,13 @@ function QuickSetup(props) {
             <div className="setupDiv">
                 <div>
                     <h5> Quick Setup</h5>
-                    <select name="toolWidth" id="quickSetup">
+                    <select name="toolWidth" id="quickSetup" onChange={ (e) => { handleQuickSetup(e.target.value) }}>
                         <option value="custom-setup" defaultValue={true}>Custom</option>
                         <option value="top-trace">Top Trace</option>
                         <option value="top-drill">Top Drill</option>
                         <option value="top-cut">Top Cut</option>
-                        <option value="bottom-trace" className="bottomSetup" disabled>Bottom Trace</option>
-                        <option value="bottom-cut" className="bottomSetup" disabled>Bottom Cut</option>
+                        <option value="bottom-trace" className="bottomSetup" disabled={ props.isChecked ? false : true }>Bottom Trace</option>
+                        <option value="bottom-cut" className="bottomSetup" disabled={ props.isChecked ? false : true }>Bottom Cut</option>
                     </select>
                 </div>
                 <div>
@@ -99,7 +241,6 @@ function DoubleSideButton(props) {
         bottomstack.svg.querySelector('#bottomlayerouter').style.display = isChecked ? 'none' : 'block';
         fullLayers.querySelector('#fullstackouter').style.display = isChecked ? 'none' : 'block';
     }
-
 
     const handleToolWidth = () => {
         const toolwidth = parseFloat(toolWidthRef.current.value);
@@ -187,9 +328,9 @@ function ToggleButton(props) {
     const handleClick = () => {
         let layerGroups = [];
 
-        if (layerId === 'toplayer') {
+        if (layerType === 'toplayer') {
             layerGroups = [topstack.svg.querySelectorAll('g'), fullLayers.querySelectorAll('g')];
-        } else if (layerId === 'bottomlayer') {
+        } else if (layerType === 'bottomlayer') {
             layerGroups = [bottomstack.svg.querySelectorAll('g'), fullLayers.querySelectorAll('g')];
         } else {
             layerGroups = [topstack.svg.querySelectorAll('g'), bottomstack.svg.querySelectorAll('g'), fullLayers.querySelectorAll('g')];
@@ -226,17 +367,20 @@ function ToggleButton(props) {
 
 
 function CanvasBackground() {
-    const { setCanvasBg } = useGerberConfig();
+    const { canvasBg, setCanvasBg } = useGerberConfig();
     return (
         <>
             {/* Canvas Background Selector */}
             <div className="canvasDiv">
                 <label htmlFor='canvasSelect'>Canvas Background </label>
-                <select name="canvasSelect" id="canvasBg" onChange={(e) => setCanvasBg(e.target.value)}>
-                    <option value="black" defaultValue={true}>Black</option>
+                <select name="canvasSelect" id="canvasBg" onChange={(e) => setCanvasBg(e.target.value) } value={canvasBg}>
+                    <option value="black">Black</option>
                     <option value="white">White</option>
                 </select>
             </div> 
         </>
     )
 }
+
+
+

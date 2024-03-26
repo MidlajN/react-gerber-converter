@@ -10,7 +10,7 @@ export default async function svg2png(svg, swidth, sheight, canvasBg) {
         img.onload = () => {
             const canvas = document.createElement("canvas");
 
-            const scaleFactor = 1000 / 25.4;
+            const scaleFactor = 1500 / 25.4;
             const scaledWidth = swidth * scaleFactor;
             const scaledHeight = sheight * scaleFactor;
 

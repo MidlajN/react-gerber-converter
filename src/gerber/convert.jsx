@@ -15,7 +15,6 @@ export default async function convertToSvg(files, setTopStack, setBottomStack, s
     const fullStackSvg = useGerberToSvg(files, stackup.layers, stackup.top)
     const newFullStackSvg = modifiedSvg({ svg: fullStackSvg, id: 'fullstack', viewbox: stackup.top.viewBox, width: stackup.top.width, height: stackup.top.height})
     
-
     setStackConfig({ 
         viewbox: { 
             viewboxX: stackup.top.viewBox[0], 
@@ -148,7 +147,9 @@ function modifiedSvg(props) {
         path.setAttribute('d', d);
         path.setAttribute('fill', 'none');
         outlineG.setAttribute('id', 'drillMask');
-        outlineG.setAttribute('transform', `translate(${ viewbox[0] + 440 } ${ viewbox[1] + viewbox[3] -500 }) scale(0.99, -0.99) translate(${ -viewbox[0] } ${ -viewbox[1]})`);
+        const topLayerTransform = `translate(${ viewbox[0] + 440 } ${ viewbox[1] + viewbox[3] -500 }) scale(0.99, -0.99) translate(${ -viewbox[0] } ${ -viewbox[1]})`
+        const bottomLayerTransform = `translate(${ viewbox[0] + viewbox[2] - 440 } ${ viewbox[1] + viewbox[3] -500 }) scale(-0.99, -0.99) translate(${ -viewbox[0] } ${ -viewbox[1]})`
+        outlineG.setAttribute('transform', `${ id === 'toplayer' ? topLayerTransform : bottomLayerTransform }`);
         outlineG.appendChild(path);
 
         svg.insertBefore(outlineG, svg.firstChild);

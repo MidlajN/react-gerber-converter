@@ -10,19 +10,18 @@ import { handleColorChange } from './gerber';
 
 export default function ConfigSection(props) {
     const { mainSvg } = useGerberConfig(); 
-    const [active, setActive] = useState(false);
     const [isChecked, setIsChecked] = useState(false);
 
     useEffect(() => {
-        if (mainSvg) {
-            setActive(true);
+        if (mainSvg.svg) {
+            props.setActive(true);
         }
     }, [mainSvg])
 
     return (
         <>
-        <div className="lg:w-1/5 lg:absolute left-0 top-8 ">
-            <div className="p-5" style={{ 'pointerEvents' : active ? 'auto' : 'none' }}>
+        <div className="lg:w-1/5 lg:absolute left-0 top-8 " style={{ 'pointerEvents' : props.active ? 'auto' : 'none' }}>
+            <div className="p-5 ps-0" >
                 <QuickSetup isChecked={isChecked} pngRef={props.pngRef} />
                 <DoubleSideButton isChecked={isChecked} setIsChecked={setIsChecked} />
                 <LayersToggleButtons isChecked={isChecked} />
@@ -116,7 +115,21 @@ const setUpConfig = (topstack, bottomstack) => {
 }
 
 function QuickSetup(props) {
-    const { mainSvg, setMainSvg, canvasBg, setCanvasBg, pngUrls, setPngUrls, fullLayers, topstack, bottomstack, setIsToggled, layerType, setLayerType } = useGerberConfig();
+    const quickSetupRef = useRef(null)
+    const { 
+        mainSvg, 
+        setMainSvg, 
+        canvasBg, 
+        setCanvasBg, 
+        pngUrls, 
+        setPngUrls, 
+        fullLayers, 
+        topstack, 
+        bottomstack, 
+        setIsToggled, 
+        layerType, 
+        setLayerType 
+    } = useGerberConfig();
     
     const handleSvg = (svg, option, setup) => {
         const [outerSvg, gerberSvg] = svg.querySelectorAll('svg');
@@ -124,7 +137,7 @@ function QuickSetup(props) {
         gerberSvg.querySelectorAll('g').forEach(g => {
             
             if (g.hasAttribute('id')) {
-                console.log('g', g)
+                // console.log('g', g)
                 const id = g.getAttribute('id');
                 g.style.display = id.includes(setup.layerid) ? 'block' : id.includes(setup.stack.id) ? 'none' : id.includes('drillMask') ? 'none' : '   ';
             }
@@ -175,29 +188,64 @@ function QuickSetup(props) {
 
         setTimeout(() => {
             handleSvg(setup.stack.svg, option, setup);
-            handleColorChange({ color: setup.color, id: topstack.id, topstack: topstack, bottomstack: bottomstack }); 
+            handleColorChange({ color: setup.color, id: topstack.id, svgs: [topstack.svg, bottomstack.svg] }); 
         }, 300);  
     }
 
-    const handlePngConversion = () => {
+    useEffect(() => {
+        console.log(pngUrls)
+    }, [pngUrls])
+
+    const generatePNG = async (targetSvg, twoSide, name) => {
+        return new Promise((resolve, reject) => {
+            const [outerSvg, gerberSvg] = targetSvg.querySelectorAll('svg');
+            const svg = twoSide ? targetSvg : gerberSvg;
+
+            const drillPath = gerberSvg.querySelector('#drillMask path');
+            drillPath.setAttribute('fill', layerType === 'bw' ? '#ffffff' : '#000000');
+            outerSvg.setAttribute('style', `opacity: ${ twoSide ? 1 : 0}; fill:${ canvasBg === 'black' ? '#ffffff' : '#000000' }`);
+
+            const svgString = new XMLSerializer().serializeToString(svg);
+            const width = parseFloat(svg.getAttribute('width'));
+            const height = parseFloat(svg.getAttribute('height'));
+            svg2png(svgString, width, height, canvasBg).then(canvas => {
+                canvas.setAttribute('style', 'width: 100%; height: 100%;');
+                canvas.toBlob(pngBlob => {
+                    const blobUrl = (window.URL || window.webkitURL || window).createObjectURL(pngBlob);
+                    resolve({ name: name, url: blobUrl });
+                }, 'image/png');
+            }).catch(err => { 
+                console.error('Error converting svg to png :', err)
+                reject(err);
+            });     
+            
+        })
+        
+    }
+
+    const handlePngConversion = async () => {
+        if (quickSetupRef.current.value === 'generate-all') {
+            const newUrls = []
+            for (const option in setUpConfig(topstack, bottomstack)) {
+                const setup = setUpConfig(topstack, bottomstack)[option];
+
+                if (!props.isChecked && setup.stack !== topstack) continue;
+                
+                const svg = setup.stack.svg.cloneNode(true);
+                handleSvg(svg, option, setup);
+                handleColorChange({ color: setup.color, id: topstack.id, svgs:[svg] });
+                const newUrl = await generatePNG(svg, props.isChecked, setup.side);
+                newUrls.push({ name: newUrl.name, url: newUrl.url });
+            }
+
+            console.log('newUrls', newUrls)
+            setPngUrls([...pngUrls, ...newUrls]);
+            return
+        }
+
         const targetSvg = mainSvg.svg === fullLayers ? topstack.svg.cloneNode(true) : mainSvg.svg.cloneNode(true); 
-        const [outerSvg, gerberSvg] = targetSvg.querySelectorAll('svg');
-        const svg = props.isChecked ? targetSvg : gerberSvg;
-
-        const drillPath = gerberSvg.querySelector('#drillMask path');
-        drillPath.setAttribute('fill', layerType === 'bw' ? '#ffffff' : '#000000');
-        outerSvg.setAttribute('style', `opacity: ${ props.isChecked ? 1 : 0}; fill:${ canvasBg === 'black' ? '#ffffff' : '#000000' }`);
-
-        const svgString = new XMLSerializer().serializeToString(svg);
-        const width = parseFloat(svg.getAttribute('width'));
-        const height = parseFloat(svg.getAttribute('height'));
-        svg2png(svgString, width, height, canvasBg).then(canvas => {
-            canvas.setAttribute('style', 'width: 100%; height: 100%;');
-            canvas.toBlob(pngBlob => {
-                const blobUrl = (window.URL || window.webkitURL || window).createObjectURL(pngBlob);
-                setPngUrls([...pngUrls, { name: mainSvg.id, url: blobUrl }]);
-            }, 'image/png');
-        }).catch(err => { console.error('Error converting svg to png :', err)});        
+        const blob = await generatePNG(targetSvg, props.isChecked, mainSvg.id);
+        setPngUrls([...pngUrls, { name: blob.name, url: blob.url }]);
     }
 
     return (
@@ -206,13 +254,14 @@ function QuickSetup(props) {
             <div className="setupDiv">
                 <div>
                     <h5> Quick Setup</h5>
-                    <select name="toolWidth" id="quickSetup" onChange={ (e) => { handleQuickSetup(e.target.value) }}>
+                    <select name="toolWidth" id="quickSetup" ref={quickSetupRef} onChange={ (e) => { if (e.target.value !== 'generate-all') handleQuickSetup(e.target.value); }}>
                         <option value="custom-setup" defaultValue={true}>Custom</option>
                         <option value="top-trace">Top Trace</option>
                         <option value="top-drill">Top Drill</option>
                         <option value="top-cut">Top Cut</option>
                         <option value="bottom-trace" className="bottomSetup" disabled={ props.isChecked ? false : true }>Bottom Trace</option>
                         <option value="bottom-cut" className="bottomSetup" disabled={ props.isChecked ? false : true }>Bottom Cut</option>
+                        <option value="generate-all" style={{ fontWeight: 600 }}>Generate All</option>
                     </select>
                 </div>
                 <div>

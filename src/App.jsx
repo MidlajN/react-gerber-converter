@@ -17,7 +17,7 @@ function App() {
     <>
      <div className='px-10 py-6 h-lvh'>
       <nav className="w-full flex justify-between items-center mb-5 navbar h-[6%]">
-        <div className='flex items-center'>
+        <div className='flex items-center ps-5'>
           <img className="w-9" src={ pcbLogo } alt="" />
           <div>
           <span className='gerber'>Gerber</span><span className='two'>2</span><span className='png'>PNG</span>

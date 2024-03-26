@@ -11,6 +11,7 @@ import JSZip from "jszip";
 export default function GerberSection() {
     const [isAnimating, setIsAnimating] = useState(false);
     const { mainSvg, pngUrls, setPngUrls } = useGerberConfig();
+    const [active, setActive] = useState(false);
     const resultRef = useRef(null);
     const pngRef = useRef(null)
 
@@ -61,11 +62,11 @@ export default function GerberSection() {
         <>
             <div className="relative h-[90%] " >
 
-                <ConfigSection pngRef={pngRef}/>
+                <ConfigSection pngRef={pngRef} active={active} setActive={setActive}/>
                 
                 <div className="h-full flex items-center justify-end">
-                    <div className="lg:w-4/5 md:w-full h-full gridsection">
-                        <SvgSideComponent />
+                    <div className="lg:w-4/5 md:w-full sm:w-full w-full h-full gridsection">
+                        <SvgSideComponent active={active} />
 
                         <DropAreaComponent />
 
@@ -78,7 +79,7 @@ export default function GerberSection() {
                             </TransformComponent>
                         </TransformWrapper>
 
-                        <SvgColorComponent />
+                        <SvgColorComponent active={active} />
 
                         <div className="pngDiv">
                             { pngUrls.length > 0 && (
@@ -150,41 +151,41 @@ function DropAreaComponent() {
     )
 }
 
-function SvgColorComponent() {
+function SvgColorComponent({active}) {
     const { topstack, bottomstack, layerType, setLayerType } = useGerberConfig();
     return (
         <>
-            <div className="layerTypeBtnGroup">
+            <div className="layerTypeBtnGroup" style={{pointerEvents: active ? 'auto' : 'none'}}>
                 <button 
                     id="original" 
                     className={`button-side colorButton ${ layerType === 'original' ? 'active' : ''}`}
                     role="button"
-                    onClick={ () => { handleColorChange({ color: 'original', id: topstack.id, topstack: topstack, bottomstack: bottomstack }); setLayerType('original') } }
+                    onClick={ () => { handleColorChange({ color: 'original', id: topstack.id, svgs: [topstack.svg, bottomstack.svg] }); setLayerType('original') } }
                 ><span className="textnew_gerber_png">Original</span></button>
 
                 <button 
                     id="bw" 
                     className={`button-side colorButton ${ layerType === 'bw' ? 'active' : ''}`}
                     role="button"
-                    onClick={ () => { handleColorChange({ color: 'bw', id: topstack.id, topstack: topstack, bottomstack: bottomstack }); setLayerType('bw') }}
+                    onClick={ () => { handleColorChange({ color: 'bw', id: topstack.id, svgs: [topstack.svg, bottomstack.svg] }); setLayerType('bw') }}
                 ><span className="text">B/W</span></button>
 
                 <button 
                     id="invert" 
                     className={`button-side colorButton ${ layerType === 'bwInvert' ? 'active' : ''}`}
                     role="button"
-                    onClick={ () => { handleColorChange({ color: 'bwInvert', id: topstack.id, topstack: topstack, bottomstack: bottomstack }); setLayerType('bwInvert') }}
+                    onClick={ () => { handleColorChange({ color: 'bwInvert', id: topstack.id, svgs: [topstack.svg, bottomstack.svg] }); setLayerType('bwInvert') }}
                 ><span className="text">Invert</span></button> 
             </div>
         </>
     )
 }
 
-function SvgSideComponent() {
+function SvgSideComponent({active}) {
     const { topstack, bottomstack, fullLayers, mainSvg, setMainSvg } = useGerberConfig();
     return (
         <>
-            <div className="layerSideBtnGroup">
+            <div className="layerSideBtnGroup" style={{pointerEvents: active ? 'auto' : 'none'}}>
                 <button className={ mainSvg.svg === fullLayers ? 'button-side active' : 'button-side'} onClick={() => { setMainSvg({ id: 'Full Layers', svg: fullLayers }) }}><span className="text">Layers</span></button>
                 <button className={ mainSvg.svg === topstack.svg ? 'button-side active' : 'button-side'} onClick={() => { setMainSvg({ id: 'top_layer', svg: topstack.svg}) }}><span className="text">Top</span></button>
                 <button className={ mainSvg.svg === bottomstack.svg ? 'button-side active' : 'button-side'} onClick={() => { setMainSvg({ id: 'bottom_layer', svg: bottomstack.svg }) }}><span className="text">Bottom</span></button>
@@ -227,11 +228,14 @@ export function handleColorChange(props) {
         `
     }
 
-    const topstackStyle = props.topstack.svg.querySelector('style');
-    topstackStyle.innerHTML = svgColor[props.color];
+    console.log(props)
+    props.svgs.forEach(svg => {
+        const stackStyle = svg.querySelector('style');
+        stackStyle.innerHTML = svgColor[props.color];
+    })
 
-    const bottomstackStyle = props.bottomstack.svg.querySelector('style');
-    bottomstackStyle.innerHTML = svgColor[props.color];
+    // const bottomstackStyle = props.bottomstack.svg.querySelector('style');
+    // bottomstackStyle.innerHTML = svgColor[props.color];
 
 }
 

@@ -1,6 +1,3 @@
-
-
-
 export default async function convertToSvg(files, setTopStack, setBottomStack, setFullLayers, setMainSvg, setStackConfig) {
 
     const stackup = await useStackup(files)
@@ -180,6 +177,7 @@ function modifiedSvg(props) {
     return newSvg
 }
 
+
 export function generateOuterSvg(width, height, toolwidth , viewbox) {
     const halfWidth = width / 2;
     const halfHeight = height / 2;
@@ -198,13 +196,15 @@ export function generateOuterSvg(width, height, toolwidth , viewbox) {
     M ${ originX } ${ originY }
     L ${ originX + halfWidth +  2 * toolwidth } ${ originY }
     L ${ originX + halfWidth +  2 * toolwidth } ${ originY - toolwidth }
-    L ${ originX + width + toolwidth } ${ originY - toolwidth }
+    L ${ originX + width } ${ originY - toolwidth }
+    L ${ originX + width + toolwidth } ${ originY }
     L ${ originX + width + toolwidth } ${ originY + halfHeight + 2 * toolwidth }
     L ${ originX + width } ${ originY + halfHeight + 2 * toolwidth }
     L ${ originX + width } ${ originY + height }
     L ${ originX + halfWidth - 2 * toolwidth } ${ originY + height }
     L ${ originX + halfWidth - 2 * toolwidth } ${ originY + height + toolwidth }
-    L ${ originX - toolwidth } ${ originY + height + toolwidth }
+    L ${ originX } ${ originY + height + toolwidth }
+    L ${ originX - toolwidth } ${ originY + height }
     L ${ originX - toolwidth } ${ originY + halfHeight - 2 * toolwidth }
     L ${ originX } ${ originY + halfHeight - 2 * toolwidth }
     L ${ originX } ${ originY }

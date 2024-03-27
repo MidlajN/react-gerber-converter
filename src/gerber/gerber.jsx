@@ -7,6 +7,7 @@ import { useGerberConfig } from "./gerberContext.jsx";
 import { PngComponent } from "./svg2png.jsx";
 import JSZip from "jszip";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faRotateRight } from "@fortawesome/free-solid-svg-icons";
 
 
 export default function GerberSection() {
@@ -222,7 +223,7 @@ function RefreshButton({ dropAreaRef, resultRef, setIsAnimating }) {
     return (
         <>
             <div className="refreshButton">
-                <button id="refreshBtn" onClick={ handleResetButton } ><FontAwesomeIcon icon={ 'fa-rotate-right' } /><div>Refresh</div></button>
+                <button id="refreshBtn" onClick={ handleResetButton } ><FontAwesomeIcon icon={ faRotateRight } /><div>Refresh</div></button>
             </div>
         </>
     )

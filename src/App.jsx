@@ -3,12 +3,7 @@ import './App.css'
 import GerberSection from './gerber/gerber.jsx'
 import { GerberProvider } from './gerber/gerberContext.jsx'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { library } from '@fortawesome/fontawesome-svg-core'
-import { fab } from '@fortawesome/free-brands-svg-icons'
-import { fas } from '@fortawesome/free-solid-svg-icons'
-import { far } from '@fortawesome/free-regular-svg-icons'
-
-library.add(fab, fas, far);
+import { faGithub } from '@fortawesome/free-brands-svg-icons'
 
 
 function App() {
@@ -25,7 +20,7 @@ function App() {
         </div>
         <div>
           <a href="https://git.fablabkerala.in/midlaj/GerberViewer" target='_blank'>
-            <FontAwesomeIcon icon="fa-brands fa-github" size="xl" />
+            <FontAwesomeIcon icon={ faGithub } size="xl" />
           </a>
         </div>
       </nav>

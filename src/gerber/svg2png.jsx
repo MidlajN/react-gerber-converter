@@ -1,3 +1,4 @@
+import { faDownload, faTrash } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 export default async function svg2png(svg, swidth, sheight, canvasBg) {
@@ -51,10 +52,10 @@ export function PngComponent(props) {
                     <p className="text-[12px]">{ name }</p>
                     <div className="buttons flex gap-2">
                         <a href={ blobUrl } download={ name }>
-                            <FontAwesomeIcon icon="fa-solid fa-download" />
+                            <FontAwesomeIcon icon={ faDownload } />
                         </a>
                         <button onClick={handleDelete} style={{ color: 'red'}}>
-                            <FontAwesomeIcon icon="fa-solid fa-trash" />
+                            <FontAwesomeIcon icon={ faTrash } />
                         </button>
                     </div>
                 </div>

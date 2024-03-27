@@ -43,6 +43,7 @@ const setUpConfig = (topstack, bottomstack) => {
                 { side: 'toplayer', button: 'silkscreen' },
                 { side: 'commonlayer', button: 'outline' },
                 { side: 'commonlayer', button: 'drill' },
+                { side: 'commonlayer', button: 'outlayer' },
             ],
             stack: topstack, 
             id: 'top_layer_traces',
@@ -58,6 +59,7 @@ const setUpConfig = (topstack, bottomstack) => {
                 { side: 'toplayer', button: 'pads' },
                 { side: 'toplayer', button: 'silkscreen' },
                 { side: 'commonlayer', button: 'outline' },
+                { side: 'commonlayer', button: 'outlayer' },
             ],
             stack:topstack,
             id: 'top_layer_drills',
@@ -194,7 +196,7 @@ function QuickSetup(props) {
         }, 300);  
     }
 
-    const generatePNG = async (targetSvg, twoSide, name) => {
+    const generatePNG = async (targetSvg, twoSide, name, canvasBg) => {
         return new Promise((resolve, reject) => {
             const [outerSvg, gerberSvg] = targetSvg.querySelectorAll('svg');
             const svg = twoSide ? targetSvg : gerberSvg;
@@ -232,7 +234,7 @@ function QuickSetup(props) {
                 const svg = setup.stack.svg.cloneNode(true);
                 handleSvg(svg, option, setup);
                 handleColorChange({ color: setup.color, id: topstack.id, svgs:[svg] });
-                const newUrl = await generatePNG(svg, props.isChecked, setup.side);
+                const newUrl = await generatePNG(svg, props.isChecked, setup.side, setup.canvas);
                 newUrls.push({ name: newUrl.name, url: newUrl.url });
             }
 
@@ -242,7 +244,7 @@ function QuickSetup(props) {
         }
 
         const targetSvg = mainSvg.svg === fullLayers ? topstack.svg.cloneNode(true) : mainSvg.svg.cloneNode(true); 
-        const blob = await generatePNG(targetSvg, props.isChecked, mainSvg.id);
+        const blob = await generatePNG(targetSvg, props.isChecked, mainSvg.id, canvasBg);
         setPngUrls([...pngUrls, { name: blob.name, url: blob.url }]);
     }
 

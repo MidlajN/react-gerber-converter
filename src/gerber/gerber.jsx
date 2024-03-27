@@ -69,7 +69,7 @@ export default function GerberSection() {
                 
                 <div className="h-full flex items-center justify-end">
                     <div className="lg:w-4/5 md:w-full sm:w-full w-full h-full gridsection">
-                        <RefreshButton dropAreaRef={ dropAreaRef } resultRef={ resultRef } setIsAnimating={setIsAnimating} />
+                        <RefreshButton dropAreaRef={ dropAreaRef } resultRef={ resultRef } setIsAnimating={setIsAnimating} setActive={setActive} />
 
                         <SvgSideComponent active={active} />
 
@@ -208,11 +208,12 @@ function SvgSideComponent({active}) {
 }
 
 
-function RefreshButton({ dropAreaRef, resultRef, setIsAnimating }) {
+function RefreshButton({ dropAreaRef, resultRef, setIsAnimating, setActive }) {
     const { handleReset } = useGerberConfig();
 
     const handleResetButton = () => {
         setIsAnimating(true);
+        setActive(false);
         setTimeout(() => {
             resultRef.current.innerHTML = ''
             resultRef.current.style.display = 'none';

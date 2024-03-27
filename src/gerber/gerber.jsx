@@ -6,6 +6,7 @@ import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
 import { useGerberConfig } from "./gerberContext.jsx";
 import { PngComponent } from "./svg2png.jsx";
 import JSZip from "jszip";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 
 export default function GerberSection() {
@@ -13,7 +14,8 @@ export default function GerberSection() {
     const { mainSvg, pngUrls, setPngUrls } = useGerberConfig();
     const [active, setActive] = useState(false);
     const resultRef = useRef(null);
-    const pngRef = useRef(null)
+    const pngRef = useRef(null);
+    const dropAreaRef = useRef(null);
 
     useEffect(() => {
         if (resultRef.current && mainSvg.svg) {  
@@ -66,9 +68,11 @@ export default function GerberSection() {
                 
                 <div className="h-full flex items-center justify-end">
                     <div className="lg:w-4/5 md:w-full sm:w-full w-full h-full gridsection">
+                        <RefreshButton dropAreaRef={ dropAreaRef } resultRef={ resultRef } setIsAnimating={setIsAnimating} />
+
                         <SvgSideComponent active={active} />
 
-                        <DropAreaComponent />
+                        <DropAreaComponent dropAreaRef={ dropAreaRef } resultRef={ resultRef } />
 
                         <TransformWrapper initialScale={1} minScale={.5} limitToBounds={ false }>
                             <TransformComponent
@@ -113,19 +117,27 @@ export default function GerberSection() {
 }
 
 
-function DropAreaComponent() {
+function DropAreaComponent(props) {
     const { setTopStack, setBottomStack, setFullLayers, setMainSvg, setLayerType, setStackConfig } = useGerberConfig();
 
     const [isDragging, setIsDragging] = useState(false);
-    const dropAreaRef = useRef(null);
+    // const dropAreaRef = useRef(null);
 
     const handleInputFiles = (e) => {
         e.preventDefault();
+        setIsDragging(false)
 
         // Access the Files From DataTransfer Object if the files are dropped
         const files = e.dataTransfer ? e.dataTransfer.files : e.target.files;
         convertToSvg(files, setTopStack, setBottomStack, setFullLayers, setMainSvg, setStackConfig).then(() => {
-            dropAreaRef.current.style.display = 'none';   
+            if (e.target.files) {
+                const newInput = document.createElement('input');
+                newInput.type = 'file';
+                e.target.parentNode.replaceChild(newInput, e.target);
+            }
+             
+            props.dropAreaRef.current.style.display = 'none';   
+            props.resultRef.current.style.display = 'flex';
             setLayerType('original')
         })
     }
@@ -133,9 +145,9 @@ function DropAreaComponent() {
     return (
         <>
             <div 
-                ref={ dropAreaRef }
+                ref={ props.dropAreaRef }
                 className={`dropArea ${isDragging ? 'active' : ''}`} 
-                onDragOver={(e) => { e.preventDefault() }} 
+                onDragOver={(e) => { e.preventDefault(); setIsDragging(true) }} 
                 onDragEnter={(e) => { e.preventDefault(); setIsDragging(true) }} 
                 onDragLeave={(e) => { e.preventDefault(); setIsDragging(false) }} 
                 onDrop={ handleInputFiles }
@@ -152,7 +164,7 @@ function DropAreaComponent() {
 }
 
 function SvgColorComponent({active}) {
-    const { topstack, bottomstack, layerType, setLayerType } = useGerberConfig();
+    const { topstack, bottomstack, layerType, setLayerType, setChangeSelect } = useGerberConfig();
     return (
         <>
             <div className="layerTypeBtnGroup" style={{pointerEvents: active ? 'auto' : 'none'}}>
@@ -160,21 +172,21 @@ function SvgColorComponent({active}) {
                     id="original" 
                     className={`button-side colorButton ${ layerType === 'original' ? 'active' : ''}`}
                     role="button"
-                    onClick={ () => { handleColorChange({ color: 'original', id: topstack.id, svgs: [topstack.svg, bottomstack.svg] }); setLayerType('original') } }
+                    onClick={ () => { handleColorChange({ color: 'original', id: topstack.id, svgs: [topstack.svg, bottomstack.svg] }); setLayerType('original'); setChangeSelect('custom-setup') } }
                 ><span className="textnew_gerber_png">Original</span></button>
 
                 <button 
                     id="bw" 
                     className={`button-side colorButton ${ layerType === 'bw' ? 'active' : ''}`}
                     role="button"
-                    onClick={ () => { handleColorChange({ color: 'bw', id: topstack.id, svgs: [topstack.svg, bottomstack.svg] }); setLayerType('bw') }}
+                    onClick={ () => { handleColorChange({ color: 'bw', id: topstack.id, svgs: [topstack.svg, bottomstack.svg] }); setLayerType('bw'); setChangeSelect('custom-setup') }}
                 ><span className="text">B/W</span></button>
 
                 <button 
                     id="invert" 
                     className={`button-side colorButton ${ layerType === 'bwInvert' ? 'active' : ''}`}
                     role="button"
-                    onClick={ () => { handleColorChange({ color: 'bwInvert', id: topstack.id, svgs: [topstack.svg, bottomstack.svg] }); setLayerType('bwInvert') }}
+                    onClick={ () => { handleColorChange({ color: 'bwInvert', id: topstack.id, svgs: [topstack.svg, bottomstack.svg] }); setLayerType('bwInvert'); setChangeSelect('custom-setup') }}
                 ><span className="text">Invert</span></button> 
             </div>
         </>
@@ -182,13 +194,35 @@ function SvgColorComponent({active}) {
 }
 
 function SvgSideComponent({active}) {
-    const { topstack, bottomstack, fullLayers, mainSvg, setMainSvg } = useGerberConfig();
+    const { topstack, bottomstack, fullLayers, mainSvg, setMainSvg, setChangeSelect } = useGerberConfig();
     return (
         <>
             <div className="layerSideBtnGroup" style={{pointerEvents: active ? 'auto' : 'none'}}>
-                <button className={ mainSvg.svg === fullLayers ? 'button-side active' : 'button-side'} onClick={() => { setMainSvg({ id: 'Full Layers', svg: fullLayers }) }}><span className="text">Layers</span></button>
-                <button className={ mainSvg.svg === topstack.svg ? 'button-side active' : 'button-side'} onClick={() => { setMainSvg({ id: 'top_layer', svg: topstack.svg}) }}><span className="text">Top</span></button>
-                <button className={ mainSvg.svg === bottomstack.svg ? 'button-side active' : 'button-side'} onClick={() => { setMainSvg({ id: 'bottom_layer', svg: bottomstack.svg }) }}><span className="text">Bottom</span></button>
+                <button className={ mainSvg.svg === fullLayers ? 'button-side active' : 'button-side'} onClick={() => { setChangeSelect('custom-setup'); setMainSvg({ id: 'Full Layers', svg: fullLayers }) }}><span className="text">Layers</span></button>
+                <button className={ mainSvg.svg === topstack.svg ? 'button-side active' : 'button-side'} onClick={() => { setChangeSelect('custom-setup'); setMainSvg({ id: 'top_layer', svg: topstack.svg}) }}><span className="text">Top</span></button>
+                <button className={ mainSvg.svg === bottomstack.svg ? 'button-side active' : 'button-side'} onClick={() => { setChangeSelect('custom-setup'); setMainSvg({ id: 'bottom_layer', svg: bottomstack.svg }) }}><span className="text">Bottom</span></button>
+            </div>
+        </>
+    )
+}
+
+
+function RefreshButton({ dropAreaRef, resultRef, setIsAnimating }) {
+    const { handleReset } = useGerberConfig();
+
+    const handleResetButton = () => {
+        setIsAnimating(true);
+        setTimeout(() => {
+            resultRef.current.innerHTML = ''
+            resultRef.current.style.display = 'none';
+            dropAreaRef.current.style.display = 'flex'
+        }, 250);
+        handleReset();
+    }
+    return (
+        <>
+            <div className="refreshButton">
+                <button id="refreshBtn" onClick={ handleResetButton } ><FontAwesomeIcon icon={ 'fa-rotate-right' } /><div>Refresh</div></button>
             </div>
         </>
     )

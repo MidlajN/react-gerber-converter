@@ -23,7 +23,7 @@ export default function ConfigSection(props) {
         <div className="lg:w-1/5 lg:absolute left-0 top-8 " style={{ 'pointerEvents' : props.active ? 'auto' : 'none' }}>
             <div className="p-5 ps-0" >
                 <QuickSetup isChecked={isChecked} pngRef={props.pngRef} />
-                <DoubleSideButton isChecked={isChecked} setIsChecked={setIsChecked} />
+                <DoubleSideButton isChecked={isChecked} setIsChecked={setIsChecked}/>
                 <LayersToggleButtons isChecked={isChecked} />
                 <CanvasBackground />
             </div>
@@ -128,7 +128,9 @@ function QuickSetup(props) {
         bottomstack, 
         setIsToggled, 
         layerType, 
-        setLayerType 
+        setLayerType ,
+        changeSelect,
+        setChangeSelect
     } = useGerberConfig();
     
     const handleSvg = (svg, option, setup) => {
@@ -192,10 +194,6 @@ function QuickSetup(props) {
         }, 300);  
     }
 
-    useEffect(() => {
-        console.log(pngUrls)
-    }, [pngUrls])
-
     const generatePNG = async (targetSvg, twoSide, name) => {
         return new Promise((resolve, reject) => {
             const [outerSvg, gerberSvg] = targetSvg.querySelectorAll('svg');
@@ -254,8 +252,12 @@ function QuickSetup(props) {
             <div className="setupDiv">
                 <div>
                     <h5> Quick Setup</h5>
-                    <select name="toolWidth" id="quickSetup" ref={quickSetupRef} onChange={ (e) => { if (e.target.value !== 'generate-all') handleQuickSetup(e.target.value); }}>
-                        <option value="custom-setup" defaultValue={true}>Custom</option>
+                    <select name="toolWidth" id="quickSetup" ref={quickSetupRef} value={changeSelect} onChange={ (e) => { 
+                            setChangeSelect(e.target.value); 
+                            if (e.target.value !== 'generate-all') handleQuickSetup(e.target.value); 
+                        }}
+                    >
+                        <option value="custom-setup">Custom</option>
                         <option value="top-trace">Top Trace</option>
                         <option value="top-drill">Top Drill</option>
                         <option value="top-cut">Top Cut</option>
@@ -276,7 +278,7 @@ function QuickSetup(props) {
  
 function DoubleSideButton(props) {
     const { isChecked, setIsChecked } = props;
-    const { topstack, bottomstack, fullLayers, handleToggleCick, isToggled, stackConfig } = useGerberConfig();
+    const { topstack, bottomstack, fullLayers, handleToggleCick, isToggled, stackConfig, setChangeSelect } = useGerberConfig();
     const toolWidthRef = useRef(null);
 
     const handleDoubleSide = (e) => {
@@ -325,7 +327,7 @@ function DoubleSideButton(props) {
                 </div>
                 <div className={ `selectToolWidth ${ isChecked ? '' : 'layerHide' }`} id="selectToolWidth">
                     <span>Tool Width</span>
-                    <select ref={ toolWidthRef } name="toolWidth" id="toolWidth" onChange={ handleToolWidth }>
+                    <select ref={ toolWidthRef } name="toolWidth" id="toolWidth" onChange={ () => {setChangeSelect('custom-setup'); handleToolWidth()}  }>
                         <option value="0.8">0.8</option>
                         <option value="0.0">0.0</option>
                     </select>
@@ -371,7 +373,7 @@ function LayersToggleButtons({ isChecked }) {
 }
 
 function ToggleButton(props) {
-    const { topstack, bottomstack, fullLayers, handleToggleCick } = useGerberConfig();
+    const { topstack, bottomstack, fullLayers, handleToggleCick, setChangeSelect } = useGerberConfig();
     const { color, layerType, layerProperty, isToggled, layerId, isChecked } = props;
 
     const handleClick = () => {
@@ -407,7 +409,7 @@ function ToggleButton(props) {
     return (
         <div className={`layer ${ layerProperty === 'outlayer' ? isChecked ? '' : 'layerHide' : ''}`}>
             <span style={{ textTransform:'capitalize' }}>{ layerProperty }</span>
-            <button className="toggleButton" style={{ 'backgroundColor': isToggled ? 'white' : color }} onClick={ handleClick }>
+            <button className="toggleButton" style={{ 'backgroundColor': isToggled ? 'white' : color }} onClick={ () => {setChangeSelect('custom-setup'); handleClick()}}>
                 <FontAwesomeIcon icon={ isToggled ? faEyeSlash : faEye } style={{ 'color': isToggled ?  '#000000' : '#ffffff'}}/>
             </button>
         </div>  
@@ -416,13 +418,13 @@ function ToggleButton(props) {
 
 
 function CanvasBackground() {
-    const { canvasBg, setCanvasBg } = useGerberConfig();
+    const { canvasBg, setCanvasBg, setChangeSelect } = useGerberConfig();
     return (
         <>
             {/* Canvas Background Selector */}
             <div className="canvasDiv">
                 <label htmlFor='canvasSelect'>Canvas Background </label>
-                <select name="canvasSelect" id="canvasBg" onChange={(e) => setCanvasBg(e.target.value) } value={canvasBg}>
+                <select name="canvasSelect" id="canvasBg" onChange={(e) => { setCanvasBg(e.target.value); setChangeSelect('custom-setup')  }} value={canvasBg}>
                     <option value="black">Black</option>
                     <option value="white">White</option>
                 </select>

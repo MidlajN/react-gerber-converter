@@ -158,3 +158,42 @@
     align-items: center;
     padding: 0.5rem 1rem;
 }
+
+/* Refresh Button */
+.refreshButton {
+    width: fit-content;
+    position: absolute;
+    bottom: 0;
+    /* right: 0; */
+    margin: 0.8rem 0.8rem;
+    cursor: pointer;
+    transition: 0.5s ease;
+    z-index: 99;
+  }
+  .refreshButton button {
+    display: flex;
+    /* justify-content: center; */
+    align-items: center; 
+    /* gap: 0.5rem; */
+    border: none;
+    background-color: #5161ce;
+    color: white;
+    border-radius: 50rem;
+    padding: 5px 8px;
+    transition: 0.5s ease-in-out;
+    box-shadow: rgb(53 144 247 / 30%) 0px 0px 0px 3px;
+  }
+  .refreshButton div {
+    width: 0;
+    opacity: 0;
+    transition: 0.5s ease;
+    font-size: 14px;
+    font-weight: 500;
+  }
+  
+  .refreshButton button:hover div {
+    width: 5rem;
+    opacity: 1;
+    margin-left: 0.5rem;
+  }
+  

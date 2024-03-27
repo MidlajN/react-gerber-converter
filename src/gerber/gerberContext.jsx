@@ -3,19 +3,44 @@ import React, {createContext, useContext, useState} from "react";
 const GerberContext = createContext();
 
 export const GerberProvider = ({children}) => {
-    const [mainSvg, setMainSvg] = useState({id: null, svg: null});
-    const [topstack, setTopStack] = useState({id: null, svg: null});
-    const [bottomstack, setBottomStack] = useState({id: null, svg: null});
-    const [fullLayers, setFullLayers] = useState(null);
-    const [layerType, setLayerType] = useState(null);
-    const [canvasBg, setCanvasBg] = useState('black');
-    const [pngUrls, setPngUrls] = useState([]);
-    const [stackConfig, setStackConfig] = useState({ vewbox: { viewboxX: 0, viewboxY: 0, viewboxW: 0, viewboxH: 0}, width: 0, height: 0 });
-    const [isToggled, setIsToggled] = useState({
+    const defaultMainSvg = {id: null, svg: null};
+    const defaultTopStack = {id: null, svg: null};
+    const defaultBottomStack = {id: null, svg: null};
+    const defaultFullLayers = null;
+    const defaultLayerType = null;
+    const defaultCanvasBg = 'black';
+    const defaultPngUrls = [];
+    const defaultChangeSelect = 'custom-setup';
+    const defaultStackConfig = { vewbox: { viewboxX: 0, viewboxY: 0, viewboxW: 0, viewboxH: 0}, width: 0, height: 0 };
+    const defaultIsToggled = {
         toplayer: { trace: false, pads: false, silkscreen: false },
         bottomlayer: { trace: false, pads: false, silkscreen: false },
         commonlayer: { outline: false, drill: false, outlayer: true}
-    });
+    };
+
+    const [mainSvg, setMainSvg] = useState(defaultMainSvg);
+    const [topstack, setTopStack] = useState(defaultTopStack);
+    const [bottomstack, setBottomStack] = useState(defaultBottomStack);
+    const [fullLayers, setFullLayers] = useState(defaultFullLayers);
+    const [layerType, setLayerType] = useState(defaultLayerType);
+    const [canvasBg, setCanvasBg] = useState(defaultCanvasBg);
+    const [pngUrls, setPngUrls] = useState(defaultPngUrls);
+    const [changeSelect, setChangeSelect] = useState(defaultChangeSelect)
+    const [stackConfig, setStackConfig] = useState(defaultStackConfig);
+    const [isToggled, setIsToggled] = useState(defaultIsToggled);
+
+    const handleReset = () => {
+        setMainSvg(defaultMainSvg);
+        setTopStack(defaultTopStack);
+        setBottomStack(defaultBottomStack);
+        setFullLayers(defaultFullLayers);
+        setLayerType(defaultLayerType);
+        setCanvasBg(defaultCanvasBg);
+        setPngUrls(defaultPngUrls);
+        setChangeSelect(defaultChangeSelect)
+        setStackConfig(defaultStackConfig);
+        setIsToggled(defaultIsToggled);
+    }
     
     const handleToggleCick = (layertype, layerproperty) => {
         setIsToggled((prevState) => ({
@@ -48,7 +73,10 @@ export const GerberProvider = ({children}) => {
                 canvasBg,
                 setCanvasBg,
                 pngUrls,
-                setPngUrls
+                setPngUrls,
+                changeSelect,
+                setChangeSelect,
+                handleReset
             }}
         >
             {children}

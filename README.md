@@ -50,7 +50,7 @@ This generates a production-ready build.
 #### Serving the Production Build
 
 ```bash
-npm run serve
+npm run preview
 ```
 
 Serves the production build locally at `http://localhost:4173`.
@@ -83,6 +83,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 <br>
 
-> *If there any known bugs found or run into any issues please let me know. Please enjoy and feel free to share your opinion, constructive criticism, or comments about my work. Email: 👉 midlaj4n@gmail.com  Thank you!*
+> *If there any known bugs found or run into any issues please let me know. Please enjoy and feel free to share your opinion, constructive criticism, or comments. Email: 👉 midlaj4n@gmail.com  Thank you!*
 
 ---

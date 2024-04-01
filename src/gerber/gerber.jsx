@@ -98,7 +98,7 @@ export default function GerberSection() {
                                     <PngComponent 
                                         key={index} 
                                         blobUrl={ url.url } 
-                                        name={ `${ url.name }.png` } 
+                                        name={ `${ url.name }_1000dpi.png` } 
                                         handleDelete={ () => {
                                             setPngUrls((prevState) => {
                                                 const newState = [...prevState];

@@ -133,6 +133,7 @@ function DropAreaComponent(props) {
         convertToSvg(files, setTopStack, setBottomStack, setFullLayers, setMainSvg, setStackConfig).then(() => {
             if (e.target.files) {
                 const newInput = document.createElement('input');
+                newInput.multiple = true;
                 newInput.type = 'file';
                 e.target.parentNode.replaceChild(newInput, e.target);
             }

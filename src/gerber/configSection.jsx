@@ -6,7 +6,6 @@ import { useGerberConfig } from './gerberContext';
 import { generateOuterSvg } from './convert';
 import svg2png from './svg2png'
 import { handleColorChange } from './gerber';
-import UPNG  from 'upng-js'
 import { changeDpiBlob } from 'changedpi';
 
 export default function ConfigSection(props) {

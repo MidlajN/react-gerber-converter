@@ -41,7 +41,7 @@ function useStackup(filesList) {
             });
         })
     )
-  .then(layers => pcbStackup(layers))
+  .then(layers => pcbStackup(layers, { maskWithOutline: false, outlineGapFill: 0.011 }))
   .catch(error => console.error(error));
 }
 
@@ -70,7 +70,7 @@ function useGerberToSvg(files, layers, svgData) {
             const fileContent = e.target.result;
             const uint8Array = new Uint8Array(fileContent);
 
-            let gerberToSvgStream = gerberToSvg(uint8Array);
+            let gerberToSvgStream = gerberToSvg(uint8Array, );
             let svg = ''
 
             gerberToSvgStream.on('data', (chunk) => { svg += chunk; });

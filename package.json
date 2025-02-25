@@ -14,11 +14,11 @@
     "@fortawesome/free-regular-svg-icons": "^6.5.1",
     "@fortawesome/free-solid-svg-icons": "^6.5.1",
     "@fortawesome/react-fontawesome": "^0.2.0",
+    "changedpi": "^1.0.4",
     "jszip": "^3.10.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "react-zoom-pan-pinch": "^3.4.3",
-    "three": "^0.162.0"
+    "react-zoom-pan-pinch": "^3.4.3"
   },
   "devDependencies": {
     "@types/react": "^18.2.64",

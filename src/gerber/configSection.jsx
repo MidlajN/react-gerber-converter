@@ -6,7 +6,8 @@ import { useGerberConfig } from './gerberContext';
 import { generateOuterSvg } from './convert';
 import svg2png from './svg2png'
 import { handleColorChange } from './gerber';
-
+import UPNG  from 'upng-js'
+import { changeDpiBlob } from 'changedpi';
 
 export default function ConfigSection(props) {
     const { mainSvg } = useGerberConfig(); 
@@ -46,7 +47,8 @@ const setUpConfig = (topstack, bottomstack) => {
                 { side: 'commonlayer', button: 'outlayer' },
             ],
             stack: topstack, 
-            id: 'top_layer_traces',
+            // id: 'top_layer_traces',
+            id: 'traces_top_layer',
             color: 'bw',
             layerid: 'top_copper',
             canvas: 'black',
@@ -62,7 +64,7 @@ const setUpConfig = (topstack, bottomstack) => {
                 { side: 'commonlayer', button: 'outlayer' },
             ],
             stack:topstack,
-            id: 'top_layer_drills',
+            id: 'drills_top_layer',
             color: 'bwInvert',
             layerid: 'drill', 
             canvas: 'white',
@@ -77,7 +79,7 @@ const setUpConfig = (topstack, bottomstack) => {
                 { side: 'commonlayer', button: 'drill' },
             ],
             stack: topstack,
-            id: 'top_layer_outline',
+            id: 'outline_top_layer',
             color: 'bwInvert',
             layerid: 'outline',
             canvas: 'black',
@@ -93,7 +95,7 @@ const setUpConfig = (topstack, bottomstack) => {
                 { side: 'commonlayer', button: 'outlayer' },
             ],
             stack: bottomstack,
-            id: 'bottom_layer_traces',
+            id: 'traces_bottom_layer',
             color: 'bw',
             layerid: 'bottom_copper',
             canvas: 'black',
@@ -108,7 +110,7 @@ const setUpConfig = (topstack, bottomstack) => {
                 { side: 'commonlayer', button: 'outlayer' },
             ],
             stack: bottomstack,
-            id: 'bottom_layer_outline',
+            id: 'outline_bottom_layer',
             color: 'bwInvert',
             layerid: 'outline',
             canvas: 'black',
@@ -208,11 +210,16 @@ function QuickSetup(props) {
             const svgString = new XMLSerializer().serializeToString(svg);
             const width = parseFloat(svg.getAttribute('width'));
             const height = parseFloat(svg.getAttribute('height'));
+
             svg2png(svgString, width, height, canvasBg).then(canvas => {
                 canvas.setAttribute('style', 'width: 100%; height: 100%;');
                 canvas.toBlob(pngBlob => {
-                    const blobUrl = (window.URL || window.webkitURL || window).createObjectURL(pngBlob);
-                    resolve({ name: name, url: blobUrl });
+                    changeDpiBlob(pngBlob, 1000).then((changeBlob) => {
+                        const finalBlob = new Blob([changeBlob], { type: 'image/png' });
+                        const blobUrl = (window.URL || window.webkitURL || window).createObjectURL(finalBlob);
+
+                        resolve({ name: name, url: blobUrl });
+                    })
                 }, 'image/png');
             }).catch(err => { 
                 console.error('Error converting svg to png :', err)
@@ -234,17 +241,21 @@ function QuickSetup(props) {
                 const svg = setup.stack.svg.cloneNode(true);
                 handleSvg(svg, option, setup);
                 handleColorChange({ color: setup.color, id: topstack.id, svgs:[svg] });
-                const newUrl = await generatePNG(svg, props.isChecked, setup.side, setup.canvas);
+                // console.log('Side : ', setup)
+                const newUrl = await generatePNG(svg, props.isChecked, setup.id, setup.canvas);
+                // console.log( 'newURLS : ',{ name: newUrl.name, url: newUrl.url })
                 newUrls.push({ name: newUrl.name, url: newUrl.url });
             }
 
-            console.log('newUrls', newUrls)
+            // console.log('newUrls', newUrls)
             setPngUrls([...pngUrls, ...newUrls]);
             return
         }
 
         const targetSvg = mainSvg.svg === fullLayers ? topstack.svg.cloneNode(true) : mainSvg.svg.cloneNode(true); 
+        // console.log('TargetSVG : ', targetSvg)
         const blob = await generatePNG(targetSvg, props.isChecked, mainSvg.id, canvasBg);
+        // console.log( 'newURLS : ',{ name: blob.name, url: blob.url })
         setPngUrls([...pngUrls, { name: blob.name, url: blob.url }]);
     }
 

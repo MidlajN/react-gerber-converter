@@ -19,7 +19,7 @@ function App() {
           </div>
         </div>
         <div>
-          <a href="https://git.fablabkerala.in/midlaj/GerberViewer" target='_blank'>
+          <a href="https://git.fablabkerala.in/midlaj/react-gerber-converter" target='_blank'>
             <FontAwesomeIcon icon={ faGithub } size="xl" />
           </a>
         </div>
